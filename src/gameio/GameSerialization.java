@@ -110,9 +110,8 @@ public class GameSerialization {
     }
 
     public static boolean savesDirIsEmpty() throws IOException {
-        try (DirectoryStream<Path> stream = Files
-                .newDirectoryStream(Path.of(GamePaths.SAVES_DIRECTORY))) {
-            return !stream.iterator().hasNext();
+        try (Stream<Path> stream = Files.list(Path.of(GamePaths.SAVES_DIRECTORY))) {
+            return stream.noneMatch(Files::isDirectory);
         }
     }
 
