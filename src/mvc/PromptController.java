@@ -1,14 +1,13 @@
-package game;
+package mvc;
 
 import gameio.GameSerialization;
-import mvc.View;
 import playercharacter.PlayerCharacter;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
-public class PromptHandler {
+public class PromptController {
 
     private static final View view = new View();
 

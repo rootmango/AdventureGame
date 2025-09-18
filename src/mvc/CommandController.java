@@ -1,38 +1,82 @@
-package game;
+package mvc;
 
 import entities.Enemies.Enemy;
+import game.MutableBoolean;
 import gameexceptions.NoEquippedItemException;
 import gameio.GameSerialization;
 import maps.GameMap;
 import maps.Place;
-import mvc.Controller;
-import mvc.View;
 import playercharacter.PlayerCharacter;
 import playercharacter.Direction;
 import quests.Quest;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
-public class CommandHandler {
+public class CommandController {
     private static final View view = new View();
-    private static final Controller controller = new Controller();
+    private static final MainController controller = new MainController();
+
+    private static final Set<String> MOVE_UP_VALUES = Set.of(
+            "north"
+//            "up",
+//            "w"
+    );
+    private static final Set<String> MOVE_LEFT_VALUES = Set.of(
+            "west"
+//            "left",
+//            "a"
+    );
+    private static final Set<String> MOVE_RIGHT_VALUES = Set.of(
+            "east"
+//            "right",
+//            "d"
+    );
+    private static final Set<String> MOVE_DOWN_VALUES = Set.of(
+            "south"
+//            "down",
+//            "s"
+    );
+
+    public boolean checkUp(String s) {
+        return MOVE_UP_VALUES.contains(s.toLowerCase());
+    }
+
+    public boolean checkLeft(String s) {
+        return MOVE_LEFT_VALUES.contains(s.toLowerCase());
+    }
+
+    public boolean checkRight(String s) {
+        return MOVE_RIGHT_VALUES.contains(s.toLowerCase());
+    }
+
+    public boolean checkDown(String s) {
+        return MOVE_DOWN_VALUES.contains(s.toLowerCase());
+    }
+
+    public String getSubjectNameFromCommandArgs(String[] commandArgs) {
+        return String.join(" ", Arrays.copyOfRange(commandArgs, 0, commandArgs.length));
+        // joins together the rest of the line in case of multi-word names
+        // so that, if the command is "attack goblin king", the method will return "goblin king"
+    }
 
     public void move(PlayerCharacter character, GameMap map, String... args) {
         if (args.length == 0) {
             printHelpCommands();
         } else {
-            if (controller.checkUp(args[0])) {
+            if (checkUp(args[0])) {
                 view.outputln("Moving north");
                 character.move(map, Direction.UP);
-            } else if (controller.checkLeft(args[0])) {
+            } else if (checkLeft(args[0])) {
                 view.outputln("Moving west");;
                 character.move(map, Direction.LEFT);
-            } else if (controller.checkRight(args[0])) {
+            } else if (checkRight(args[0])) {
                 view.outputln("Moving east");;
                 character.move(map, Direction.RIGHT);
-            } else if (controller.checkDown(args[0])) {
+            } else if (checkDown(args[0])) {
                 view.outputln("Moving south");;
                 character.move(map, Direction.DOWN);
             }
@@ -55,7 +99,7 @@ public class CommandHandler {
         if (args.length == 0) {
             printHelpCommands();
         } else {
-            String itemContainerName = controller.getSubjectNameFromCommandArgs(args);
+            String itemContainerName = getSubjectNameFromCommandArgs(args);
             Place currentPlace = character.getCurrentPlace(map);
             try {
                 character.takeItemByName(currentPlace, itemContainerName);
@@ -73,7 +117,7 @@ public class CommandHandler {
         if (args.length == 0) {
             printHelpCommands();
         } else {
-            String itemName = controller.getSubjectNameFromCommandArgs(args);
+            String itemName = getSubjectNameFromCommandArgs(args);
             try {
                 character.useItemByName(itemName);
             } catch (NoSuchElementException e) {
@@ -86,7 +130,7 @@ public class CommandHandler {
         if (args.length == 0) {
             printHelpCommands();
         } else {
-            String enemyName = controller.getSubjectNameFromCommandArgs(args);
+            String enemyName = getSubjectNameFromCommandArgs(args);
             Place currentPlace = character.getCurrentPlace(map);
             try {
                 Enemy enemy = currentPlace.getEnemies().stream()

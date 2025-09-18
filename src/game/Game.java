@@ -2,7 +2,8 @@ package game;
 
 import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.Controller;
+import mvc.CommandController;
+import mvc.MainController;
 import mvc.View;
 import playercharacter.*;
 import quests.Quest;
@@ -13,11 +14,11 @@ import java.util.List;
 public class Game {
 
     private static final View view = new View();
-    private static final Controller controller = new Controller();
+    private static final MainController controller = new MainController();
 
     public void gameLoop(PlayerCharacter character, GameMap map, List<Quest> questList,
                                 MutableBoolean won, MutableBoolean dead, MutableBoolean quit,
-                                long startTime, String saveName, CommandHandler commandHandler) {
+                                long startTime, String saveName, CommandController commandController) {
 
         final Object lock = new Object();
 
@@ -42,58 +43,8 @@ public class Game {
 
         while (!won.getValue() && !dead.getValue() && !quit.getValue()) {
 
-            view.output("> ");
-
-            String[] inputArgs = view.userInputString().split(" ");
-
-            if (inputArgs.length > 0) {
-                String command = controller.getCommandFromInputArgs(inputArgs);
-                String[] args = controller.getCommandArgsFromInputArgs(inputArgs);
-
-                if (command.equalsIgnoreCase("move")) {
-                    synchronized (lock) {
-                        commandHandler.move(character, map, args);
-                    }
-                } else if (command.equalsIgnoreCase("map")) {
-                    commandHandler.map(character, map);
-                } else if (command.equalsIgnoreCase("look")) {
-                    commandHandler.look(character, map);
-                } else if (command.equalsIgnoreCase("inventory")) {
-                    commandHandler.inventory(character);
-                } else if (command.equalsIgnoreCase("take")) {
-                    synchronized (lock) {
-                        commandHandler.take(character, map, args);
-                    }
-                } else if (command.equalsIgnoreCase("stats")) {
-                    commandHandler.stats(character);
-                } else if (command.equalsIgnoreCase("use")) {
-                    synchronized (lock) {
-                        commandHandler.use(character, args);
-                    }
-                } else if (command.equalsIgnoreCase("attack")) {
-                    synchronized (lock) {
-                        commandHandler.attack(character, map, args);
-                    }
-                } else if (command.equalsIgnoreCase("unequip")) {
-                    synchronized (lock) {
-                        commandHandler.unequip(character);
-                    }
-                } else if (command.equalsIgnoreCase("equipped")) {
-                    commandHandler.equipped(character);
-                } else if (command.equalsIgnoreCase("quests")) {
-                    commandHandler.quests(questList);
-                } else if (command.equalsIgnoreCase("save")) {
-                    synchronized (lock) {
-                        commandHandler.save(character, map, startTime, saveName);
-                    }
-                } else if (command.equalsIgnoreCase("quit")) {
-                    synchronized (lock) {
-                        commandHandler.quit(quit);
-                    }
-                } else {
-                    commandHandler.printHelpCommands();
-                }
-            }
+            controller.handleCommandInput(view, commandController, lock, character, map,
+                            questList, startTime, saveName, quit);
 
             synchronized (lock) {
                 questList.forEach(Quest::setOrUpdateCompleted);
@@ -106,23 +57,23 @@ public class Game {
         }
 
         autosaveThread.interrupt();
-        onExit(character, map, won, dead, quit, startTime, saveName, commandHandler);
+        onExit(character, map, won, dead, quit, startTime, saveName, commandController);
 
     }
 
     private void onExit(PlayerCharacter character, GameMap map, MutableBoolean won,
                                MutableBoolean dead, MutableBoolean quit, long startTime, String saveName,
-                               CommandHandler commandHandler) {
+                               CommandController commandController) {
         if (quit.getValue() == true) {
             view.outputln("Quitting game...");
             view.outputln("\nCharacter stats:");
-            commandHandler.stats(character);
+            commandController.stats(character);
             view.outputln();
-            commandHandler.save(character, map, startTime, saveName);
+            commandController.save(character, map, startTime, saveName);
         } else if (won.getValue() == true) {
             view.outputln("You have won the game!");
             view.outputln("\nCharacter stats:");
-            commandHandler.stats(character);
+            commandController.stats(character);
             view.outputln();
             Time.printElapsedTime(startTime);
             try {
