@@ -1,3 +1,5 @@
+import game.GameLoopCoreParams;
+import game.GameLoopMutableBooleans;
 import mvc.CommandController;
 import mvc.PromptController;
 import gameexceptions.CharacterNotFoundException;
@@ -71,7 +73,9 @@ public class Program {
                     "Try moving to a desired direction (for example, \"move north\") or looking around " +
                             "(\"look\")");
 
-            game.gameLoop(character, map, questList, won, dead, quit, startTime, saveName, commandController);
+            var gameLoopCoreParams = new GameLoopCoreParams(character, map, questList, saveName);
+            var gameLoopMutableBooleans = new GameLoopMutableBooleans(won, dead, quit);
+            game.gameLoop(gameLoopCoreParams, gameLoopMutableBooleans, startTime, commandController);
         } catch (IOException e) {
             view.outputln("Error: " + e.getMessage());
         } catch (CharacterNotFoundException e) {

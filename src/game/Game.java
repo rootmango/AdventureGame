@@ -16,9 +16,17 @@ public class Game {
     private static final View view = new View();
     private static final MainController controller = new MainController();
 
-    public void gameLoop(PlayerCharacter character, GameMap map, List<Quest> questList,
-                                MutableBoolean won, MutableBoolean dead, MutableBoolean quit,
-                                long startTime, String saveName, CommandController commandController) {
+    public void gameLoop(GameLoopCoreParams gameLoopCoreParams,
+                         GameLoopMutableBooleans gameLoopMutableBooleans,
+                         long startTime, CommandController commandController) {
+
+        PlayerCharacter character = gameLoopCoreParams.character();
+        GameMap map = gameLoopCoreParams.map();
+        List<Quest> questList = gameLoopCoreParams.questList();
+        String saveName = gameLoopCoreParams.saveName();
+        MutableBoolean won = gameLoopMutableBooleans.won();
+        MutableBoolean dead = gameLoopMutableBooleans.dead();
+        MutableBoolean quit = gameLoopMutableBooleans.quit();
 
         final Object lock = new Object();
 
@@ -43,8 +51,8 @@ public class Game {
 
         while (!won.getValue() && !dead.getValue() && !quit.getValue()) {
 
-            controller.handleCommandInput(view, commandController, lock, character, map,
-                            questList, startTime, saveName, quit);
+            controller.handleCommandInput(view, commandController, lock,
+                                            gameLoopCoreParams, startTime, quit);
 
             synchronized (lock) {
                 questList.forEach(Quest::setOrUpdateCompleted);

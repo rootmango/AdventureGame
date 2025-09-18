@@ -1,5 +1,6 @@
 package mvc;
 
+import game.GameLoopCoreParams;
 import game.MutableBoolean;
 import maps.GameMap;
 import playercharacter.PlayerCharacter;
@@ -23,8 +24,14 @@ public class MainController {
     }
 
     public void handleCommandInput(View view, CommandController commandController, Object lock,
-                                   PlayerCharacter character, GameMap map, List<Quest> questList,
-                                   long startTime, String saveName, MutableBoolean quit) {
+                                   GameLoopCoreParams gameLoopCoreParams,
+                                   long startTime, MutableBoolean quit) {
+
+        PlayerCharacter character = gameLoopCoreParams.character();
+        GameMap map = gameLoopCoreParams.map();
+        List<Quest> questList = gameLoopCoreParams.questList();
+        String saveName = gameLoopCoreParams.saveName();
+
         view.output("> ");
 
         String[] inputArgs = view.userInputString().split(" ");
