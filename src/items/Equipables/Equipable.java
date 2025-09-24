@@ -2,10 +2,10 @@ package items.Equipables;
 
 import gameexceptions.AnotherItemAlreadyEquippedException;
 import items.Item;
-import mvc.View;
+import mvc.views.MainView;
 
 public abstract class Equipable extends Item {
-    protected static final View view = new View();
+    protected final MainView mainView = new MainView();
 
     protected int attackAmount;
     protected int manaConsumptionAmount;
@@ -32,7 +32,7 @@ public abstract class Equipable extends Item {
             owner.setEquippedItem(this);
             owner.removeFromItemList(this);
         } catch (AnotherItemAlreadyEquippedException e) {
-            view.outputln("An item is already equipped! Unequip it first to equip this one!");
+            mainView.outputln("An item is already equipped! Unequip it first to equip this one!");
         }
     }
 }

@@ -2,11 +2,18 @@ package entities.Enemies.BossEnemies;
 
 import entities.Enemies.Enemy;
 import gamerandom.GameRNG;
+import mvc.views.MainView;
 import playercharacter.PlayerCharacter;
 
 public abstract class BossEnemy extends Enemy {
     protected int minAttack;
     protected int maxAttack;
+
+    public BossEnemy(MainView mainView) {
+        super(mainView);
+    }
+
+    public BossEnemy() {}
 
     @Override
     public int attackAmount() {
@@ -19,7 +26,7 @@ public abstract class BossEnemy extends Enemy {
             isDead = true;
             character.afterDefeatingBossEnemy();
             character.addXP(xp);
-            view.outputln(deathMessage);
+            mainView.outputln(deathMessage);
         }
     }
 }

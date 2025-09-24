@@ -1,14 +1,15 @@
-package mvc;
+package mvc.controllers;
 
 import game.GameLoopCoreParams;
 import game.MutableBoolean;
 import maps.GameMap;
+import mvc.views.CharacterView;
+import mvc.views.MainView;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 public class MainController {
     public String getCommandFromInputArgs(String[] inputArgs) {
@@ -23,18 +24,18 @@ public class MainController {
         return Arrays.copyOfRange(inputArgs, 1, inputArgs.length);
     }
 
-    public void handleCommandInput(View view, CommandController commandController, Object lock,
+    public void handleCommandInput(MainView mainView, CommandController commandController, Object lock,
                                    GameLoopCoreParams gameLoopCoreParams,
-                                   long startTime, MutableBoolean quit) {
+                                   long startTime, MutableBoolean quit, CharacterView characterView) {
 
         PlayerCharacter character = gameLoopCoreParams.character();
         GameMap map = gameLoopCoreParams.map();
         List<Quest> questList = gameLoopCoreParams.questList();
         String saveName = gameLoopCoreParams.saveName();
 
-        view.output("> ");
+        mainView.output("> ");
 
-        String[] inputArgs = view.userInputString().split(" ");
+        String[] inputArgs = mainView.userInputString().split(" ");
 
         if (inputArgs.length > 0) {
             String command = getCommandFromInputArgs(inputArgs);

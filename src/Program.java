@@ -1,11 +1,12 @@
 import game.GameLoopCoreParams;
 import game.GameLoopMutableBooleans;
-import mvc.CommandController;
-import mvc.PromptController;
+import mvc.controllers.CommandController;
+import mvc.controllers.MainController;
+import mvc.controllers.PromptController;
 import gameexceptions.CharacterNotFoundException;
 import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.View;
+import mvc.views.*;
 import playercharacter.*;
 import quests.*;
 import game.Game;
@@ -15,13 +16,21 @@ import java.io.IOException;
 import java.util.*;
 
 public class Program {
-    private static final View view = new View();
-
-    private static final CommandController commandController = new CommandController();
-    private static final Game game = new Game();
-    private static final PromptController promptController = new PromptController();
 
     public static void main(String[] args) {
+        final MainView mainView = new MainView();
+        final QuestView questView = new QuestView();
+        final CharacterView characterView = new CharacterView();
+        final GameMapView mapView = new GameMapView();
+
+        final CommandController commandController = new CommandController(mainView, questView, characterView);
+        final MainController mainController = new MainController();
+        final Game game = new Game(mainView, mainController, characterView);
+        final GameSaveView gameSaveView = new GameSaveView();
+        final PromptYesNoView promptYesNoView = new PromptYesNoView();
+        final PromptController promptController = new PromptController(mainView, gameSaveView,
+                                                                        characterView, promptYesNoView);
+
         try {
 
             PlayerCharacter character;
@@ -33,13 +42,13 @@ public class Program {
 
             if (startNewGame) {
                 saveName = promptController.promptNewSaveName();
-                map = new GameMap();
+                map = new GameMap(mainView);
                 String characterType = promptController.promptCharacterType();
-                character = new PlayerCharacter(characterType);
+                character = new PlayerCharacter(characterType, mainView, mapView);
                 character.findCharacterAndSetCoordinates(map);
                 startTime = System.currentTimeMillis();
                 GameSerialization.createOrOverwriteSave(character, map, startTime, saveName);
-                view.outputln("New save \"" + saveName + "\" created successfully!");
+                mainView.outputln("New save \"" + saveName + "\" created successfully!");
 
                 commandController.printHelpCommands();
             } else {
@@ -52,7 +61,7 @@ public class Program {
                 // By subtracting the number of elapsed milliseconds from the current time,
                 // we're making it as if the current session started X amount of milliseconds
                 // earlier.
-                view.outputln("Loaded save \"" + saveName + "\"");
+                mainView.outputln("Loaded save \"" + saveName + "\"");
             }
 
             MutableBoolean won = new MutableBoolean(false);
@@ -65,11 +74,11 @@ public class Program {
 
             questList.forEach(Quest::setOrUpdateCompleted);
             // necessary if we are loading a game and the conditions are already met
-            view.outputln("Quests:");
+            mainView.outputln("Quests:");
             commandController.quests(questList);
-            view.outputln();
+            mainView.outputln();
             commandController.map(character, map);
-            view.outputln(
+            mainView.outputln(
                     "Try moving to a desired direction (for example, \"move north\") or looking around " +
                             "(\"look\")");
 
@@ -77,9 +86,9 @@ public class Program {
             var gameLoopMutableBooleans = new GameLoopMutableBooleans(won, dead, quit);
             game.gameLoop(gameLoopCoreParams, gameLoopMutableBooleans, startTime, commandController);
         } catch (IOException e) {
-            view.outputln("Error: " + e.getMessage());
+            mainView.outputln("Error: " + e.getMessage());
         } catch (CharacterNotFoundException e) {
-            view.outputln("Error in map file: " + e.getMessage());
+            mainView.outputln("Error in map file: " + e.getMessage());
         }
     }
 }

@@ -8,9 +8,10 @@ import entities.Enemies.Enemy;
 import entities.ItemContainers.Chest;
 import entities.ItemContainers.ItemContainer;
 import entities.ItemContainers.WanderingMerchant;
+import mvc.views.MainView;
 
 public class GameRandom {
-    public static Enemy randomEnemy() {
+    public static Enemy randomEnemy(MainView mainView) {
         int random = GameRNG.randomInRange(1, 11);
         // Probabilities:
         // Goblin - 5 in 11
@@ -18,13 +19,13 @@ public class GameRandom {
         // Ogre - 2 in 11
         // Undead - 1 in 11
         if (random <= 5) {
-            return new Goblin();
+            return new Goblin(mainView);
         } else if (random >= 6 && random <= 8) {
-            return new Thief();
+            return new Thief(mainView);
         } else if (random >= 9 && random <= 10) {
-            return new Undead();
+            return new Undead(mainView);
         } else if (random == 11) {
-            return new Ogre();
+            return new Ogre(mainView);
         } else {
             throw new RuntimeException("Unexpected error");
         }

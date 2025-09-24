@@ -3,6 +3,7 @@ package maps;
 import gameexceptions.CharacterNotFoundException;
 import gameexceptions.UnrecognizedCharException;
 import gameio.MapIO;
+import mvc.views.MainView;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -16,8 +17,19 @@ import java.util.stream.Stream;
 public class GameMap implements Serializable {
     private final Place[][] placesArray;
 
-    public GameMap() throws IOException {
-        placesArray = fillMap();
+    public GameMap(MainView mainView) throws IOException {
+        placesArray = fillMap(mainView);
+    }
+
+    /**
+     * Only used for gson's deserialization - gson requires a class to have an (either
+     * public or protected) no-args constructor to automatically set all of its
+     * fields during deserialization.
+     */
+    protected GameMap() {
+        // set only to avoid compiler error.
+        // this value doesn't matter, gson will still change it upon deserialization.
+        placesArray = new Place[1][1];
     }
 
     public GameMap(Place[][] placesArray) {
@@ -40,13 +52,13 @@ public class GameMap implements Serializable {
         return fortress;
     }
 
-    public Place[][] fillMap() throws IOException {
+    public Place[][] fillMap(MainView mainView) throws IOException {
         List<String> lines = MapIO.randomMap();
         Place[][] array = new Place[lines.size()][lines.getFirst().length()];
         for (int i = 0; i < lines.size(); i++) {
             for (int j = 0; j < lines.get(i).length(); j++) {
                 char c = lines.get(i).charAt(j);
-                array[i][j] = new Place(j, i, c);
+                array[i][j] = new Place(j, i, c, mainView);
             }
         }
 

@@ -35,9 +35,4 @@ public abstract class Quest implements Serializable {
             }
         }
     }
-
-    public String infoStatus() {
-        String statusSymbol = (completed) ? "✔\uFE0F" : " ";
-        return "[" + statusSymbol + "] " + name;
-    }
 }

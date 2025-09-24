@@ -1,7 +1,10 @@
 package entities.Enemies.BossEnemies;
 
+import mvc.views.MainView;
+
 public class GoblinKing extends BossEnemy {
-    public GoblinKing() {
+    public GoblinKing(MainView mainView) {
+        super(mainView);
         name = "Goblin King";
         maxHealth = 150;
         currentHealth = maxHealth;
@@ -10,4 +13,6 @@ public class GoblinKing extends BossEnemy {
         xp = 100;
         deathMessage = "You have defeated the Goblin King!";
     }
+
+    protected GoblinKing() {}
 }

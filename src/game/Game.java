@@ -2,9 +2,10 @@ package game;
 
 import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.CommandController;
-import mvc.MainController;
-import mvc.View;
+import mvc.controllers.CommandController;
+import mvc.controllers.MainController;
+import mvc.views.CharacterView;
+import mvc.views.MainView;
 import playercharacter.*;
 import quests.Quest;
 
@@ -13,8 +14,15 @@ import java.util.List;
 
 public class Game {
 
-    private static final View view = new View();
-    private static final MainController controller = new MainController();
+    protected final MainView mainView;
+    protected final MainController mainController;
+    protected final CharacterView characterView;
+
+    public Game(MainView mainView, MainController mainController, CharacterView characterView) {
+        this.mainView = mainView;
+        this.mainController = mainController;
+        this.characterView = characterView;
+    }
 
     public void gameLoop(GameLoopCoreParams gameLoopCoreParams,
                          GameLoopMutableBooleans gameLoopMutableBooleans,
@@ -41,7 +49,7 @@ public class Game {
                 } catch (InterruptedException e) {
                     run = false;
                 } catch (IOException e) {
-                    view.outputln("Error: " + e.getMessage());
+                    mainView.outputln("Error: " + e.getMessage());
                     run = false;
                 }
             }
@@ -51,8 +59,8 @@ public class Game {
 
         while (!won.getValue() && !dead.getValue() && !quit.getValue()) {
 
-            controller.handleCommandInput(view, commandController, lock,
-                                            gameLoopCoreParams, startTime, quit);
+            mainController.handleCommandInput(mainView, commandController, lock,
+                                            gameLoopCoreParams, startTime, quit, characterView);
 
             synchronized (lock) {
                 questList.forEach(Quest::setOrUpdateCompleted);
@@ -73,29 +81,29 @@ public class Game {
                                MutableBoolean dead, MutableBoolean quit, long startTime, String saveName,
                                CommandController commandController) {
         if (quit.getValue() == true) {
-            view.outputln("Quitting game...");
-            view.outputln("\nCharacter stats:");
+            mainView.outputln("Quitting game...");
+            mainView.outputln("\nCharacter stats:");
             commandController.stats(character);
-            view.outputln();
+            mainView.outputln();
             commandController.save(character, map, startTime, saveName);
         } else if (won.getValue() == true) {
-            view.outputln("You have won the game!");
-            view.outputln("\nCharacter stats:");
+            mainView.outputln("You have won the game!");
+            mainView.outputln("\nCharacter stats:");
             commandController.stats(character);
-            view.outputln();
+            mainView.outputln();
             Time.printElapsedTime(startTime);
             try {
                 GameSerialization.deleteSave(saveName);
             } catch (IOException e) {
-                view.outputln("Couldn't delete save: ");
+                mainView.outputln("Couldn't delete save: ");
             }
         } else if (dead.getValue() == true) {
-            view.outputln("You have died!");
+            mainView.outputln("You have died!");
             Time.printElapsedTime(startTime);
             try {
                 GameSerialization.deleteSave(saveName);
             } catch (IOException e) {
-                view.outputln("Couldn't delete save: ");
+                mainView.outputln("Couldn't delete save: ");
             }
         }
     }

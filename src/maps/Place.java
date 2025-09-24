@@ -9,6 +9,7 @@ import gameexceptions.UnrecognizedCharException;
 import gamerandom.GameRNG;
 import gamerandom.GameRandom;
 import game.*;
+import mvc.views.MainView;
 
 import java.io.Serializable;
 import java.util.*;
@@ -93,14 +94,14 @@ public class Place implements Serializable {
         return isBorder;
     }
 
-    public Place(int xCoordinate, int yCoordinate, char c) throws UnrecognizedCharException {
+    public Place(int xCoordinate, int yCoordinate, char c, MainView mainView) throws UnrecognizedCharException {
         this.xCoordinate = xCoordinate;
         this.yCoordinate = yCoordinate;
         symbol = c;
         if (PLACES.containsKey(c)) {
             name = PLACES.get(c).name();
             description = PLACES.get(c).description();
-            seed();
+            seed(mainView);
         } else if (c == 'E') {
             name = "Entry";
             description = "entry placeholder";
@@ -110,7 +111,7 @@ public class Place implements Serializable {
             isFortress = true;
             isLocked = true;
             inaccessibleMessage = "Fortress is currently locked! You can't enter it right now!";
-            seedWithGoblinKing();
+            seedWithGoblinKing(mainView);
         } else if (c == '0') {
             name = "Border";
             description = "border placeholder";
@@ -139,7 +140,7 @@ public class Place implements Serializable {
     /**
      * Fills the current place with a random number of distinct item containers and enemies.
      */
-    private void seed() {
+    private void seed(MainView mainView) {
         // For simplicity of the game interface's sake, each place may not contain more than one type
         // of enemy or item container.
         //
@@ -155,7 +156,7 @@ public class Place implements Serializable {
         int enemiesCount = GameRNG.randomInRange(1, 3);
         int enemiesIterator = 0;
         do {
-            Enemy enemy = GameRandom.randomEnemy();
+            Enemy enemy = GameRandom.randomEnemy(mainView);
             if (!enemies.contains(enemy)) {
                 enemies.add(enemy);
                 enemiesIterator++;
@@ -173,22 +174,8 @@ public class Place implements Serializable {
         } while (containersIterator < itemContainersCount);
     }
 
-    private void seedWithGoblinKing() {
-        enemies.add(new GoblinKing());
-    }
-
-    /**
-     * Returns a {@code String} of the names of all the entities contained in this {@code Place},
-     * or, if it's empty, a {@code String} indicating that.
-     */
-    public String entitiesInfo() {
-        if (itemContainers.isEmpty() && enemies.isEmpty()) {
-            return "There's nothing here!";
-        } else {
-            return Stream.concat(itemContainers.stream(), enemies.stream())
-                    .map(Entity::getName)
-                    .collect(Collectors.joining("\n"));
-        }
+    private void seedWithGoblinKing(MainView mainView) {
+        enemies.add(new GoblinKing(mainView));
     }
 
     public boolean isLocked() {

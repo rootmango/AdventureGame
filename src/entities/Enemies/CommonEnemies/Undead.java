@@ -1,7 +1,10 @@
 package entities.Enemies.CommonEnemies;
 
+import mvc.views.MainView;
+
 public class Undead extends CommonEnemy {
-    public Undead() {
+    public Undead(MainView mainView) {
+        super(mainView);
         name = "Undead";
         maxHealth = 65;
         currentHealth = maxHealth;
@@ -9,4 +12,6 @@ public class Undead extends CommonEnemy {
         xp = 25;
         deathMessage = "Undead has died... Hopefully for good this time!";
     }
+
+    protected Undead() {}
 }

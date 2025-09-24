@@ -1,17 +1,32 @@
 package entities.Enemies;
 
 import entities.Entity;
-import mvc.View;
+import mvc.views.MainView;
 import playercharacter.*;
 
 public abstract class Enemy extends Entity {
-    protected static final View view = new View();
+    protected final MainView mainView;
 
     protected int maxHealth;
     protected int currentHealth;
     protected int xp;
     protected boolean isDead = false;
     protected String deathMessage;
+
+    public Enemy(MainView mainView) {
+        this.mainView = mainView;
+    }
+
+    /**
+     * Only used for gson's deserialization - gson requires a class to have an (either
+     * public or protected) no-args constructor to automatically set all of its
+     * fields during deserialization.
+     */
+    public Enemy() {
+        // set only to avoid compiler error.
+        // this value doesn't matter, gson will still change it upon deserialization.
+        mainView = new MainView();
+    }
 
     public abstract int attackAmount();
 
@@ -24,7 +39,7 @@ public abstract class Enemy extends Entity {
         if (currentHealth <= 0) {
             isDead = true;
             character.addXP(xp);
-            view.outputln(deathMessage);
+            mainView.outputln(deathMessage);
         }
     }
 
@@ -32,17 +47,25 @@ public abstract class Enemy extends Entity {
         return isDead;
     }
 
-    public void getAttacked(PlayerCharacter character) {
+    private void characterAttack(PlayerCharacter character) {
         int characterAttackAmount = character.attackAmount();
-        int attackAmount = this.attackAmount();
         currentHealth -= characterAttackAmount;
         character.consumeMana();
-        view.outputln("You attack " + getName() + " for " + characterAttackAmount + " damage");
+        mainView.outputln("You attack " + getName() + " for " + characterAttackAmount + " damage");
+    }
+
+    private void characterReceiveAttack(PlayerCharacter character) {
+        int attackAmount = this.attackAmount();
+        character.subtractHealth(attackAmount);
+        mainView.outputln(getName() + " attacks back for " + attackAmount + " damage");
+        mainView.outputln(getName() + " has " + currentHealth + " remaining health");
+    }
+
+    public void getAttacked(PlayerCharacter character) {
+        characterAttack(character);
         this.checkAndSetIfDead(character);
         if (!isDead) {
-            character.subtractHealth(attackAmount);
-            view.outputln(getName() + " attacks back for " + attackAmount + " damage");
-            view.outputln(getName() + " has " + currentHealth + " remaining health");
+            characterReceiveAttack(character);
         }
     }
 

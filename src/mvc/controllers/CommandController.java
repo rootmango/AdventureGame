@@ -1,4 +1,4 @@
-package mvc;
+package mvc.controllers;
 
 import entities.Enemies.Enemy;
 import game.MutableBoolean;
@@ -6,6 +6,10 @@ import gameexceptions.NoEquippedItemException;
 import gameio.GameSerialization;
 import maps.GameMap;
 import maps.Place;
+import mvc.views.CharacterView;
+import mvc.views.GameMapView;
+import mvc.views.QuestView;
+import mvc.views.MainView;
 import playercharacter.PlayerCharacter;
 import playercharacter.Direction;
 import quests.Quest;
@@ -17,8 +21,15 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 
 public class CommandController {
-    private static final View view = new View();
-    private static final MainController controller = new MainController();
+    protected final MainView mainView;
+    protected final QuestView questView;
+    protected final CharacterView characterView;
+
+    public CommandController(MainView mainView, QuestView questView, CharacterView characterView) {
+        this.mainView = mainView;
+        this.questView = questView;
+        this.characterView = characterView;
+    }
 
     private static final Set<String> MOVE_UP_VALUES = Set.of(
             "north"
@@ -68,16 +79,16 @@ public class CommandController {
             printHelpCommands();
         } else {
             if (checkUp(args[0])) {
-                view.outputln("Moving north");
+                mainView.outputln("Moving north");
                 character.move(map, Direction.UP);
             } else if (checkLeft(args[0])) {
-                view.outputln("Moving west");;
+                mainView.outputln("Moving west");;
                 character.move(map, Direction.LEFT);
             } else if (checkRight(args[0])) {
-                view.outputln("Moving east");;
+                mainView.outputln("Moving east");;
                 character.move(map, Direction.RIGHT);
             } else if (checkDown(args[0])) {
-                view.outputln("Moving south");;
+                mainView.outputln("Moving south");;
                 character.move(map, Direction.DOWN);
             }
         }
@@ -92,7 +103,7 @@ public class CommandController {
     }
 
     public void inventory(PlayerCharacter character) {
-        character.printInventory();
+        characterView.showInventory(character);
     }
 
     public void take(PlayerCharacter character, GameMap map, String... args) {
@@ -104,13 +115,13 @@ public class CommandController {
             try {
                 character.takeItemByName(currentPlace, itemContainerName);
             } catch (NoSuchElementException e) {
-                view.outputln("No such item container here");
+                mainView.outputln("No such item container here");
             }
         }
     }
 
     public void stats(PlayerCharacter character) {
-        view.outputln(character.stats());
+        mainView.outputln(character.stats());
     }
 
     public void use(PlayerCharacter character, String... args) {
@@ -121,7 +132,7 @@ public class CommandController {
             try {
                 character.useItemByName(itemName);
             } catch (NoSuchElementException e) {
-                view.outputln("No such item in inventory");
+                mainView.outputln("No such item in inventory");
             }
         }
     }
@@ -142,7 +153,7 @@ public class CommandController {
                     currentPlace.getEnemies().remove(enemy);
                 }
             } catch (NoSuchElementException e) {
-                view.outputln("No such enemy here");
+                mainView.outputln("No such enemy here");
             }
         }
     }
@@ -151,7 +162,7 @@ public class CommandController {
         try {
             character.unequip();
         } catch (NoEquippedItemException e) {
-            view.outputln("No item is currently equipped!");
+            mainView.outputln("No item is currently equipped!");
         }
     }
 
@@ -160,41 +171,41 @@ public class CommandController {
     }
 
     public void quests(List<Quest> questList) {
-        questList.forEach(q -> view.outputln(q.infoStatus()));
+        questList.forEach(questView::showInfoStatus);
     }
 
     public void printHelpCommands() {
-        view.outputln();
-        view.outputln("Available commands you can use:\n");
+        mainView.outputln();
+        mainView.outputln("Available commands you can use:\n");
 
-        view.outputln("move [north | east | west | south] - moves to the desired direction");
-        view.outputln("map - shows your current coordinates");
-        view.outputln("look - shows what's around you");
-        view.outputln("inventory - shows all the items you currently have in your inventory");
-        view.outputln("take [item container] - takes an item from an item container "
+        mainView.outputln("move [north | east | west | south] - moves to the desired direction");
+        mainView.outputln("map - shows your current coordinates");
+        mainView.outputln("look - shows what's around you");
+        mainView.outputln("inventory - shows all the items you currently have in your inventory");
+        mainView.outputln("take [item container] - takes an item from an item container "
                                                         + "(for example, \"take chest\")");
-        view.outputln("stats - shows you character's stats");
-        view.outputln("use [item] - uses an item from your inventory. If it's a consumable "
+        mainView.outputln("stats - shows you character's stats");
+        mainView.outputln("use [item] - uses an item from your inventory. If it's a consumable "
                 + "(for example, a potion), consumes it, and if it's an equipable "
                 + "(for  example, weapons), equips it.");
-        view.outputln("attack [enemy] - attacks a nearby enemy (for example, \"attack goblin\")");
-        view.outputln("unequip - if you have equipped an item, unequips it and "
+        mainView.outputln("attack [enemy] - attacks a nearby enemy (for example, \"attack goblin\")");
+        mainView.outputln("unequip - if you have equipped an item, unequips it and "
                                                         + "puts it back in your inventory");
-        view.outputln("equipped - shows your equipped item, if you have one");
-        view.outputln("quests - shows the quests you have and your progress in them");
-        view.outputln("save - saves your current progress. Note that your progress is periodically "
+        mainView.outputln("equipped - shows your equipped item, if you have one");
+        mainView.outputln("quests - shows the quests you have and your progress in them");
+        mainView.outputln("save - saves your current progress. Note that your progress is periodically "
                                                         + "autosaved as well");
-        view.outputln("help - shows this list of commands if you forget them");
+        mainView.outputln("help - shows this list of commands if you forget them");
 
-        view.outputln();
+        mainView.outputln();
     }
 
     public void save(PlayerCharacter character, GameMap map, long startTime, String saveName) {
         try {
             GameSerialization.createOrOverwriteSave(character, map, startTime, saveName);
-            view.outputln("Saved to \"" + saveName + "\"");
+            mainView.outputln("Saved to \"" + saveName + "\"");
         } catch (IOException e) {
-            view.outputln("Error saving: " + e.getMessage());
+            mainView.outputln("Error saving: " + e.getMessage());
         }
     }
 

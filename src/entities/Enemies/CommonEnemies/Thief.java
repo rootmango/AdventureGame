@@ -1,7 +1,10 @@
 package entities.Enemies.CommonEnemies;
 
+import mvc.views.MainView;
+
 public class Thief extends CommonEnemy {
-    public Thief() {
+    public Thief(MainView mainView) {
+        super(mainView);
         name = "Thief";
         maxHealth = 40;
         currentHealth = maxHealth;
@@ -9,4 +12,6 @@ public class Thief extends CommonEnemy {
         xp = 12;
         deathMessage = "Thief has died";
     }
+
+    protected Thief() {}
 }

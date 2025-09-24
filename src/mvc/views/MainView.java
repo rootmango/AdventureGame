@@ -1,8 +1,8 @@
-package mvc;
+package mvc.views;
 
 import java.util.Scanner;
 
-public class View {
+public class MainView {
     public String userInputString() {
         var scanner = new Scanner(System.in);
         return scanner.nextLine();
