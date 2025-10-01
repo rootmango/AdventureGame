@@ -26,7 +26,6 @@ public abstract class BossEnemy extends Enemy {
         if (currentHealth <= 0) {
             isDead = true;
             character.afterDefeatingBossEnemy();
-            character.addXP(xp);
             enemyObserver.died(this);
         }
     }
