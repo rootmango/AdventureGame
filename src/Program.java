@@ -97,7 +97,7 @@ public class Program {
             questList.forEach(Quest::setOrUpdateCompleted);
             // necessary if we are loading a game and the conditions are already met
             mainView.outputln("Quests:");
-            new QuestsCommand(questList);
+            new QuestsCommand(questList).execute();
             mainView.outputln();
             new MapCommand(character, map).execute();
             mainView.outputln(

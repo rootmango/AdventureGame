@@ -40,13 +40,12 @@ public class PromptView extends MainView{
     }
 
     public void showInvalidSaveNameTakenMessage() {
-        outputln("Invalid save name! Try again! (Must not contain illegal characters)");
+        outputln("Invalid save name! Try again! (Save name is already taken)");
         showPromptChar();
     }
 
     public void askCharacterType() {
         outputln("Choose a class for your character!");
-        showPromptChar();
     }
 
     public void showInvalidCharacterTypeMessage() {

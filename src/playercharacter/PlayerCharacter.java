@@ -34,7 +34,7 @@ public class PlayerCharacter implements Serializable {
     private int yCoordinate;
     private final List<Item> itemList = new ArrayList<>();
     private final List<Equipable> equippedItem = new ArrayList<>();
-    private int xp = 0;
+    private int xp = 190;
 
     private boolean isFightingBossEnemy = false;
     private String currentBossEnemyName = "";
@@ -114,7 +114,7 @@ public class PlayerCharacter implements Serializable {
         }
     }
 
-    public static Map<String, CharacterStats> characterTypes = new HashMap<>(Map.ofEntries(
+    public static Map<String, CharacterStats> characterTypes = new LinkedHashMap<>(Map.ofEntries(
             Map.entry("warrior",
                     new CharacterStats(100, 80, 10, 20,
                             "Warrior - More health", "You have chosen warrior!")),
@@ -322,12 +322,14 @@ public class PlayerCharacter implements Serializable {
     public int attackAmount() {
         int baseAttackAmount = GameRNG.randomInRange(minAttack, maxAttack);
         int equippedItemAttackAmount;
+        int equippedItemManaConsumptionAmount;
 
         if (hasEquippedItem()) {
             Equipable item = equippedItem.getFirst();
             equippedItemAttackAmount = item.getAttackAmount();
+            equippedItemManaConsumptionAmount = item.getManaConsumptionAmount();
 
-            if (consumeMana(equippedItemAttackAmount)) {
+            if (consumeMana(equippedItemManaConsumptionAmount)) {
                 return baseAttackAmount + equippedItemAttackAmount;
             } else {
                 return baseAttackAmount;

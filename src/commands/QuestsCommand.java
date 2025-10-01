@@ -31,7 +31,7 @@ public class QuestsCommand extends Command {
                 new QuestView(),
                 new CharacterView(new GameMapView()),
                 new CommandObserver(new CommandView()),
-                new PlayerCharacter("", new MainView(), new GameMapView(),
+                new PlayerCharacter("warrior", new MainView(), new GameMapView(),
                                     new CharacterObserver(new CharacterView(new GameMapView())),
                                     new PlaceObserver(new PlaceView())),
                 new GameMap(new Place[0][0]),

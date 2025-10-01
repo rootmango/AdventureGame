@@ -32,6 +32,7 @@ public class CharacterView extends MainView {
         PlayerCharacter.characterTypes.values().forEach(value -> {
             outputln("- " + (value.description()));
         });
+        output("> ");
     }
 
     public void showOnChosenCharacterType(String characterTypeName) {
