@@ -1,10 +1,11 @@
 package entities.Enemies.BossEnemies;
 
+import mvc.observers.EnemyObserver;
 import mvc.views.MainView;
 
 public class GoblinKing extends BossEnemy {
-    public GoblinKing(MainView mainView) {
-        super(mainView);
+    public GoblinKing(EnemyObserver enemyObserver) {
+        super(enemyObserver);
         name = "Goblin King";
         maxHealth = 150;
         currentHealth = maxHealth;

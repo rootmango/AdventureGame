@@ -1,10 +1,11 @@
 package entities.Enemies.CommonEnemies;
 
+import mvc.observers.EnemyObserver;
 import mvc.views.MainView;
 
 public class Thief extends CommonEnemy {
-    public Thief(MainView mainView) {
-        super(mainView);
+    public Thief(EnemyObserver enemyObserver) {
+        super(enemyObserver);
         name = "Thief";
         maxHealth = 40;
         currentHealth = maxHealth;

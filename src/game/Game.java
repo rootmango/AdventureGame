@@ -1,11 +1,15 @@
 package game;
 
+import commands.SaveCommand;
 import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.controllers.CommandController;
 import mvc.controllers.MainController;
+import mvc.observers.CommandObserver;
+import mvc.observers.GameObserver;
 import mvc.views.CharacterView;
 import mvc.views.MainView;
+import mvc.views.PromptView;
+import mvc.views.QuestView;
 import playercharacter.*;
 import quests.Quest;
 
@@ -17,16 +21,30 @@ public class Game {
     protected final MainView mainView;
     protected final MainController mainController;
     protected final CharacterView characterView;
+    protected final GameObserver gameObserver;
+    protected final PromptView promptView;
+    protected final QuestView questView;
+    protected final CommandObserver commandObserver;
+    protected final GameSerialization gameSerialization;
+    protected final GameTime gameTime;
 
-    public Game(MainView mainView, MainController mainController, CharacterView characterView) {
+    public Game(MainView mainView, MainController mainController, CharacterView characterView,
+                GameObserver gameObserver, PromptView promptView, QuestView questView,
+                CommandObserver commandObserver, GameSerialization gameSerialization, GameTime gameTime) {
         this.mainView = mainView;
         this.mainController = mainController;
         this.characterView = characterView;
+        this.gameObserver = gameObserver;
+        this.promptView = promptView;
+        this.questView = questView;
+        this.commandObserver = commandObserver;
+        this.gameSerialization = gameSerialization;
+        this.gameTime = gameTime;
     }
 
     public void gameLoop(GameLoopCoreParams gameLoopCoreParams,
                          GameLoopMutableBooleans gameLoopMutableBooleans,
-                         long startTime, CommandController commandController) {
+                         long startTime) {
 
         PlayerCharacter character = gameLoopCoreParams.character();
         GameMap map = gameLoopCoreParams.map();
@@ -43,13 +61,13 @@ public class Game {
             while (run) {
                 try {
                     synchronized (lock) {
-                        GameSerialization.createOrOverwriteSave(character, map, startTime, saveName);
+                        gameSerialization.createOrOverwriteSave(character, map, startTime, saveName, gameTime);
                     }
                     Thread.sleep(20_000);
                 } catch (InterruptedException e) {
                     run = false;
                 } catch (IOException e) {
-                    mainView.outputln("Error: " + e.getMessage());
+                    gameObserver.generalIOError(e);
                     run = false;
                 }
             }
@@ -59,9 +77,10 @@ public class Game {
 
         while (!won.getValue() && !dead.getValue() && !quit.getValue()) {
 
-            mainController.handleCommandInput(mainView, commandController, lock,
-                                            gameLoopCoreParams, startTime, quit, characterView);
-
+            mainController.handleCommandInput(mainView, lock, gameLoopCoreParams,
+                                                startTime, quit, promptView, questView,
+                                                characterView, commandObserver, gameSerialization,
+                                                gameTime);
             synchronized (lock) {
                 questList.forEach(Quest::setOrUpdateCompleted);
                 if (character.isDead()) {
@@ -69,41 +88,32 @@ public class Game {
                     dead.setValue(true);
                 }
             }
-
         }
 
         autosaveThread.interrupt();
-        onExit(character, map, won, dead, quit, startTime, saveName, commandController);
+        onExit(character, map, won, dead, quit, startTime, saveName, characterView, gameSerialization);
 
     }
 
     private void onExit(PlayerCharacter character, GameMap map, MutableBoolean won,
                                MutableBoolean dead, MutableBoolean quit, long startTime, String saveName,
-                               CommandController commandController) {
+                               CharacterView characterView, GameSerialization gameSerialization) {
         if (quit.getValue() == true) {
-            mainView.outputln("Quitting game...");
-            mainView.outputln("\nCharacter stats:");
-            commandController.stats(character);
-            mainView.outputln();
-            commandController.save(character, map, startTime, saveName);
+            gameObserver.quitGame(character, characterView);
+            new SaveCommand(character, map, startTime, saveName, gameSerialization, gameTime).execute();
         } else if (won.getValue() == true) {
-            mainView.outputln("You have won the game!");
-            mainView.outputln("\nCharacter stats:");
-            commandController.stats(character);
-            mainView.outputln();
-            Time.printElapsedTime(startTime);
+            gameObserver.won(character, characterView, startTime);
             try {
-                GameSerialization.deleteSave(saveName);
+                gameSerialization.deleteSave(saveName);
             } catch (IOException e) {
-                mainView.outputln("Couldn't delete save: ");
+                gameObserver.errorDeletingSave(e);
             }
         } else if (dead.getValue() == true) {
-            mainView.outputln("You have died!");
-            Time.printElapsedTime(startTime);
+            gameObserver.died(startTime);
             try {
-                GameSerialization.deleteSave(saveName);
+                gameSerialization.deleteSave(saveName);
             } catch (IOException e) {
-                mainView.outputln("Couldn't delete save: ");
+                gameObserver.errorDeletingSave(e);
             }
         }
     }

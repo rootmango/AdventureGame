@@ -9,6 +9,8 @@ import gameexceptions.UnrecognizedCharException;
 import gamerandom.GameRNG;
 import gamerandom.GameRandom;
 import game.*;
+import mvc.observers.EnemyObserver;
+import mvc.observers.ItemObserver;
 import mvc.views.MainView;
 
 import java.io.Serializable;
@@ -94,14 +96,15 @@ public class Place implements Serializable {
         return isBorder;
     }
 
-    public Place(int xCoordinate, int yCoordinate, char c, MainView mainView) throws UnrecognizedCharException {
+    public Place(int xCoordinate, int yCoordinate, char c, EnemyObserver enemyObserver,
+                 ItemObserver itemObserver, GameRandom gameRandom) throws UnrecognizedCharException {
         this.xCoordinate = xCoordinate;
         this.yCoordinate = yCoordinate;
         symbol = c;
         if (PLACES.containsKey(c)) {
             name = PLACES.get(c).name();
             description = PLACES.get(c).description();
-            seed(mainView);
+            seed(enemyObserver, itemObserver, gameRandom);
         } else if (c == 'E') {
             name = "Entry";
             description = "entry placeholder";
@@ -111,7 +114,7 @@ public class Place implements Serializable {
             isFortress = true;
             isLocked = true;
             inaccessibleMessage = "Fortress is currently locked! You can't enter it right now!";
-            seedWithGoblinKing(mainView);
+            seedWithGoblinKing(enemyObserver);
         } else if (c == '0') {
             name = "Border";
             description = "border placeholder";
@@ -140,7 +143,7 @@ public class Place implements Serializable {
     /**
      * Fills the current place with a random number of distinct item containers and enemies.
      */
-    private void seed(MainView mainView) {
+    private void seed(EnemyObserver enemyObserver, ItemObserver itemObserver, GameRandom gameRandom) {
         // For simplicity of the game interface's sake, each place may not contain more than one type
         // of enemy or item container.
         //
@@ -156,7 +159,7 @@ public class Place implements Serializable {
         int enemiesCount = GameRNG.randomInRange(1, 3);
         int enemiesIterator = 0;
         do {
-            Enemy enemy = GameRandom.randomEnemy(mainView);
+            Enemy enemy = gameRandom.randomEnemy(enemyObserver);
             if (!enemies.contains(enemy)) {
                 enemies.add(enemy);
                 enemiesIterator++;
@@ -166,7 +169,7 @@ public class Place implements Serializable {
         int itemContainersCount = GameRNG.randomInRange(1, 1);
         int containersIterator = 0;
         do {
-            ItemContainer itemContainer = GameRandom.randomItemContainer();
+            ItemContainer itemContainer = gameRandom.randomItemContainer(itemObserver);
             if (!itemContainers.contains(itemContainer)) {
                 itemContainers.add(itemContainer);
                 containersIterator++;
@@ -174,8 +177,8 @@ public class Place implements Serializable {
         } while (containersIterator < itemContainersCount);
     }
 
-    private void seedWithGoblinKing(MainView mainView) {
-        enemies.add(new GoblinKing(mainView));
+    private void seedWithGoblinKing(EnemyObserver enemyObserver) {
+        enemies.add(new GoblinKing(enemyObserver));
     }
 
     public boolean isLocked() {

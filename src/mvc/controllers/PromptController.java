@@ -1,10 +1,10 @@
 package mvc.controllers;
 
-import gameio.GameSerialization;
+import mvc.observers.PromptObserver;
 import mvc.views.CharacterView;
 import mvc.views.GameSaveView;
 import mvc.views.MainView;
-import mvc.views.PromptYesNoView;
+import mvc.views.PromptYesNoValidation;
 
 import java.io.IOException;
 import java.util.List;
@@ -14,14 +14,16 @@ public class PromptController {
     protected final MainView mainView;
     protected final GameSaveView gameSaveView;
     protected final CharacterView characterView;
-    protected final PromptYesNoView promptYesNoView;
+    protected final PromptYesNoValidation promptYesNoValidation;
+    protected final PromptObserver promptObserver;
 
     public PromptController(MainView mainView, GameSaveView gameSaveView, CharacterView characterView,
-                            PromptYesNoView promptYesNoView) {
+                            PromptYesNoValidation promptYesNoValidation, PromptObserver promptObserver) {
         this.mainView = mainView;
         this.gameSaveView = gameSaveView;
         this.characterView = characterView;
-        this.promptYesNoView = promptYesNoView;
+        this.promptYesNoValidation = promptYesNoValidation;
+        this.promptObserver = promptObserver;
     }
 
     /**
@@ -30,17 +32,16 @@ public class PromptController {
     public boolean promptNewGame() throws IOException {
         boolean isValidInput = false;
         String answer = "";
-        mainView.outputln("Do you want to start a new game?");
+        promptObserver.promptedStartNewGame();
         while (!isValidInput) {
-            mainView.output("> ");
             answer = mainView.userInputString();
-            isValidInput = promptYesNoView.isValidInput(answer);
+            isValidInput = promptYesNoValidation.isValidInput(answer);
             if (!isValidInput) {
-                mainView.outputln("Do you want to start a new game? (yes/no)");
+                promptObserver.promptedStartNewGameWithHint();
             }
         }
 
-        if (promptYesNoView.isYes(answer)) {
+        if (promptYesNoValidation.isYes(answer)) {
             return true;
         } else {
             // if we are out of the while loop, then answer is necessarily in one of
@@ -48,7 +49,7 @@ public class PromptController {
             // Since we're in the else block (answer is not in the "yes" set),
             // answer is in the "no" set.
             if (gameSaveView.savesDirIsEmpty()) {
-                mainView.outputln("No existing saves to load from. Creating a new game instead.");
+                promptObserver.noExistingSaves();
                 return true;
             } else {
                 return false;
@@ -63,11 +64,10 @@ public class PromptController {
         List<String> availableSavesNames = gameSaveView.showAvailableSavesNames();
         String answer = "";
         while (!availableSavesNames.contains(answer)) {
-            mainView.outputln("Choose a save: ");
-            mainView.output("> ");
+            promptObserver.promptedChooseSave();
             answer = mainView.userInputString();
             if (!availableSavesNames.contains(answer)) {
-                mainView.outputln("No save with such name!");
+                promptObserver.noSuchSave();
             }
         }
 
@@ -85,16 +85,15 @@ public class PromptController {
      */
     public String promptNewSaveName() throws IOException {
         String saveName = "";
-        mainView.outputln("Enter save name:");
+        promptObserver.promptedSaveName();
         while (saveName.isEmpty()) {
-            mainView.output("> ");
             String input = mainView.userInputString();
             boolean isValidInput = gameSaveView.isValidNewSaveName(input);
             boolean isTakenSaveName = gameSaveView.saveNameIsTaken(input);
             if (!isValidInput) {
-                mainView.outputln("Invalid save name! Try again! (Must not contain illegal characters)");
+                promptObserver.enteredInvalidSaveNameIllegalChars();
             } else if (isTakenSaveName) {
-                mainView.outputln("Invalid save name! Try again! (Save name is already taken)");
+                promptObserver.enteredInvalidSaveNameTaken();
             } else {
                 saveName = input;
             }
@@ -104,16 +103,15 @@ public class PromptController {
     }
 
     public String promptCharacterType() {
-        mainView.outputln("Choose a class for your character!");
+        promptObserver.promptedCharacterType();
         characterView.showCharacterTypeNames();
         String answer = "";
         boolean isValidCharacterTypeName = false;
         while (!isValidCharacterTypeName) {
-            mainView.output("> ");
             answer = mainView.userInputString();
             isValidCharacterTypeName = characterView.isValidCharacterTypeName(answer);
             if (!isValidCharacterTypeName) {
-                mainView.outputln("Invalid name! Try again!");
+                promptObserver.enteredInvalidCharacterType();
             }
         }
         characterView.showOnChosenCharacterType(answer);

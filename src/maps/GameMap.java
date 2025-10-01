@@ -3,6 +3,9 @@ package maps;
 import gameexceptions.CharacterNotFoundException;
 import gameexceptions.UnrecognizedCharException;
 import gameio.MapIO;
+import gamerandom.GameRandom;
+import mvc.observers.EnemyObserver;
+import mvc.observers.ItemObserver;
 import mvc.views.MainView;
 
 import java.io.IOException;
@@ -17,8 +20,9 @@ import java.util.stream.Stream;
 public class GameMap implements Serializable {
     private final Place[][] placesArray;
 
-    public GameMap(MainView mainView) throws IOException {
-        placesArray = fillMap(mainView);
+    public GameMap(EnemyObserver enemyObserver, ItemObserver itemObserver,
+                   GameRandom gameRandom) throws IOException {
+        placesArray = fillMap(enemyObserver, itemObserver, gameRandom);
     }
 
     /**
@@ -52,13 +56,15 @@ public class GameMap implements Serializable {
         return fortress;
     }
 
-    public Place[][] fillMap(MainView mainView) throws IOException {
-        List<String> lines = MapIO.randomMap();
+    public Place[][] fillMap(EnemyObserver enemyObserver, ItemObserver itemObserver,
+                             GameRandom gameRandom) throws IOException {
+        MapIO mapIO = new MapIO();
+        List<String> lines = mapIO.randomMap();
         Place[][] array = new Place[lines.size()][lines.getFirst().length()];
         for (int i = 0; i < lines.size(); i++) {
             for (int j = 0; j < lines.get(i).length(); j++) {
                 char c = lines.get(i).charAt(j);
-                array[i][j] = new Place(j, i, c, mainView);
+                array[i][j] = new Place(j, i, c, enemyObserver, itemObserver, gameRandom);
             }
         }
 

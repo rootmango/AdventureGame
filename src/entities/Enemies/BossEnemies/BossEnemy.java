@@ -2,6 +2,7 @@ package entities.Enemies.BossEnemies;
 
 import entities.Enemies.Enemy;
 import gamerandom.GameRNG;
+import mvc.observers.EnemyObserver;
 import mvc.views.MainView;
 import playercharacter.PlayerCharacter;
 
@@ -9,8 +10,8 @@ public abstract class BossEnemy extends Enemy {
     protected int minAttack;
     protected int maxAttack;
 
-    public BossEnemy(MainView mainView) {
-        super(mainView);
+    public BossEnemy(EnemyObserver enemyObserver) {
+        super(enemyObserver);
     }
 
     public BossEnemy() {}
@@ -26,7 +27,7 @@ public abstract class BossEnemy extends Enemy {
             isDead = true;
             character.afterDefeatingBossEnemy();
             character.addXP(xp);
-            mainView.outputln(deathMessage);
+            enemyObserver.died(this);
         }
     }
 }

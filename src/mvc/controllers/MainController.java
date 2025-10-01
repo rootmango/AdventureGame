@@ -1,10 +1,16 @@
 package mvc.controllers;
 
+import commands.Command;
+import commands.CommandFactory;
+import commands.CommandParameters;
 import game.GameLoopCoreParams;
+import game.GameTime;
 import game.MutableBoolean;
+import gameexceptions.InvalidCommandNameException;
+import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.views.CharacterView;
-import mvc.views.MainView;
+import mvc.observers.CommandObserver;
+import mvc.views.*;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
@@ -24,65 +30,36 @@ public class MainController {
         return Arrays.copyOfRange(inputArgs, 1, inputArgs.length);
     }
 
-    public void handleCommandInput(MainView mainView, CommandController commandController, Object lock,
+    public void handleCommandInput(MainView mainView, Object lock,
                                    GameLoopCoreParams gameLoopCoreParams,
-                                   long startTime, MutableBoolean quit, CharacterView characterView) {
+                                   long startTime, MutableBoolean quit, PromptView promptView,
+                                   QuestView questView, CharacterView characterView,
+                                   CommandObserver commandObserver, GameSerialization gameSerialization,
+                                   GameTime gameTime) {
 
         PlayerCharacter character = gameLoopCoreParams.character();
         GameMap map = gameLoopCoreParams.map();
         List<Quest> questList = gameLoopCoreParams.questList();
         String saveName = gameLoopCoreParams.saveName();
 
-        mainView.output("> ");
+        promptView.showPromptChar();
 
         String[] inputArgs = mainView.userInputString().split(" ");
 
         if (inputArgs.length > 0) {
-            String command = getCommandFromInputArgs(inputArgs);
+            String commandName = getCommandFromInputArgs(inputArgs);
             String[] args = getCommandArgsFromInputArgs(inputArgs);
 
-            if (command.equalsIgnoreCase("move")) {
-                synchronized (lock) {
-                    commandController.move(character, map, args);
-                }
-            } else if (command.equalsIgnoreCase("map")) {
-                commandController.map(character, map);
-            } else if (command.equalsIgnoreCase("look")) {
-                commandController.look(character, map);
-            } else if (command.equalsIgnoreCase("inventory")) {
-                commandController.inventory(character);
-            } else if (command.equalsIgnoreCase("take")) {
-                synchronized (lock) {
-                    commandController.take(character, map, args);
-                }
-            } else if (command.equalsIgnoreCase("stats")) {
-                commandController.stats(character);
-            } else if (command.equalsIgnoreCase("use")) {
-                synchronized (lock) {
-                    commandController.use(character, args);
-                }
-            } else if (command.equalsIgnoreCase("attack")) {
-                synchronized (lock) {
-                    commandController.attack(character, map, args);
-                }
-            } else if (command.equalsIgnoreCase("unequip")) {
-                synchronized (lock) {
-                    commandController.unequip(character);
-                }
-            } else if (command.equalsIgnoreCase("equipped")) {
-                commandController.equipped(character);
-            } else if (command.equalsIgnoreCase("quests")) {
-                commandController.quests(questList);
-            } else if (command.equalsIgnoreCase("save")) {
-                synchronized (lock) {
-                    commandController.save(character, map, startTime, saveName);
-                }
-            } else if (command.equalsIgnoreCase("quit")) {
-                synchronized (lock) {
-                    commandController.quit(quit);
-                }
-            } else {
-                commandController.printHelpCommands();
+            var commandParams = new CommandParameters(questView, characterView,
+                    commandObserver, character, map, questList, startTime, saveName,
+                    quit, gameSerialization, gameTime, lock, args);
+
+            try {
+                var commandFactory = new CommandFactory();
+                Command command = commandFactory.createCommand(commandName, commandParams);
+                command.execute();
+            } catch (InvalidCommandNameException e) {
+                mainView.outputln("Error: " + e.getMessage());
             }
         }
 

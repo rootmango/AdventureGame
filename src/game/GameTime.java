@@ -4,14 +4,12 @@ import mvc.views.MainView;
 
 import java.util.concurrent.TimeUnit;
 
-public class Time {
-    private static final MainView mainView = new MainView();
-
-    public static long elapsedTimeFrom(long startTime) {
+public class GameTime {
+    public long elapsedTimeFrom(long startTime) {
         return System.currentTimeMillis() - startTime;
     }
 
-    public static void printElapsedTime(long startTime) {
+    public void printElapsedTime(long startTime, MainView mainView) {
         long minutes = TimeUnit.MILLISECONDS.toMinutes(elapsedTimeFrom(startTime));
         if (minutes >= 0 && minutes <= 59) {
             mainView.outputln("Play time: " + minutes + " minutes");

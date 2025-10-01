@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class MapIO {
-    public static List<String> randomMap() throws IOException {
+    public List<String> randomMap() throws IOException {
         try (Stream<Path> mapFilesStream = Files.list(Path.of(GamePaths.MAPS_DIRECTORY).toAbsolutePath())) {
             List<Path> mapFiles = mapFilesStream
                     .filter(path -> path.toString().endsWith(".gamemap"))
@@ -30,7 +30,7 @@ public class MapIO {
         }
     }
 
-    private static List<String> parseMapFromFileLines(List<String> lines) throws GameIOException {
+    private List<String> parseMapFromFileLines(List<String> lines) throws GameIOException {
         String mapBeginValue = MapParsingValues.MAP_BEGIN;
         String mapEndValue = MapParsingValues.MAP_END;
         if (lines.contains(mapBeginValue) && lines.contains(mapEndValue)

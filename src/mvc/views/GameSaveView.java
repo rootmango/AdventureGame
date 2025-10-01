@@ -6,9 +6,15 @@ import java.io.IOException;
 import java.util.List;
 
 public class GameSaveView extends MainView {
+    protected final GameSerialization gameSerialization;
+
+    public GameSaveView(GameSerialization gameSerialization) {
+        this.gameSerialization = gameSerialization;
+    }
+
     public List<String> showAvailableSavesNames() throws IOException {
-        List<String> availableSavesNames = GameSerialization.avaiableSavesNames();
-        System.out.println("Available saves: ");
+        List<String> availableSavesNames = gameSerialization.avaiableSavesNames();
+        outputln("Available saves: ");
         availableSavesNames.forEach(System.out::println);
         return availableSavesNames;
     }
@@ -27,10 +33,10 @@ public class GameSaveView extends MainView {
     }
 
     public boolean saveNameIsTaken(String name) throws IOException {
-        return GameSerialization.avaiableSavesNames().contains(name);
+        return gameSerialization.avaiableSavesNames().contains(name);
     }
 
     public boolean savesDirIsEmpty() throws IOException {
-        return GameSerialization.savesDirIsEmpty();
+        return gameSerialization.savesDirIsEmpty();
     }
 }

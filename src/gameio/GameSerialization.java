@@ -1,6 +1,6 @@
 package gameio;
 
-import game.Time;
+import game.GameTime;
 import items.Consumables.Consumable;
 import items.Deserializers.ConsumableDeserializer;
 import entities.Deserializers.EnemyDeserializer;
@@ -16,7 +16,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.*;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -24,7 +23,15 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class GameSerialization {
-    public static GameMap readGameMapFromSave(String saveName)
+    public DeserializedBundle readFromSave(String saveName) throws IOException {
+        return new DeserializedBundle(
+                readPlayerCharacterFromSave(saveName),
+                readGameMapFromSave(saveName),
+                readElapsedTimeFromSave(saveName)
+        );
+    }
+
+    public GameMap readGameMapFromSave(String saveName)
             throws IOException {
 
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;
@@ -38,7 +45,7 @@ public class GameSerialization {
         );
     }
 
-    public static PlayerCharacter readPlayerCharacterFromSave(String saveName)
+    public PlayerCharacter readPlayerCharacterFromSave(String saveName)
             throws IOException {
 
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;
@@ -55,7 +62,7 @@ public class GameSerialization {
         return playerCharacter;
     }
 
-    public static long readElapsedTimeFromSave(String saveName) throws IOException {
+    public long readElapsedTimeFromSave(String saveName) throws IOException {
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;
         var gson = new Gson();
         return gson.fromJson(
@@ -64,8 +71,8 @@ public class GameSerialization {
         );
     }
 
-    public static void createOrOverwriteSave(PlayerCharacter playerCharacter, GameMap gameMap,
-                                             long startTime, String saveName)
+    public void createOrOverwriteSave(PlayerCharacter playerCharacter, GameMap gameMap,
+                                             long startTime, String saveName, GameTime gameTime)
             throws IOException {
 
         String saveDirName = GamePaths.SAVES_DIRECTORY + "/" + saveName;
@@ -83,10 +90,10 @@ public class GameSerialization {
         Files.writeString(gameMapFilePath, gson.toJson(gameMap));
 
         Path elapsedTimeFilePath = Path.of(saveDir + "/elapsed_time.json");
-        Files.writeString(elapsedTimeFilePath, gson.toJson(Time.elapsedTimeFrom(startTime)));
+        Files.writeString(elapsedTimeFilePath, gson.toJson(gameTime.elapsedTimeFrom(startTime)));
     }
 
-    public static List<String> avaiableSavesNames() throws IOException {
+    public List<String> avaiableSavesNames() throws IOException {
         try (Stream<Path> stream = Files.list(Path.of(GamePaths.SAVES_DIRECTORY))) {
             return stream
                     .filter(Files::isDirectory)
@@ -95,7 +102,7 @@ public class GameSerialization {
         }
     }
 
-    public static void deleteSave(String saveName) throws IOException {
+    public void deleteSave(String saveName) throws IOException {
         Path savePath = Path.of(GamePaths.SAVES_DIRECTORY + "/" + saveName);
         if (avaiableSavesNames().contains(saveName)) {
             try (Stream<Path> stream = Files.walk(savePath)) {
@@ -109,13 +116,13 @@ public class GameSerialization {
         }
     }
 
-    public static boolean savesDirIsEmpty() throws IOException {
+    public boolean savesDirIsEmpty() throws IOException {
         try (Stream<Path> stream = Files.list(Path.of(GamePaths.SAVES_DIRECTORY))) {
             return stream.noneMatch(Files::isDirectory);
         }
     }
 
-    public static boolean savesDirExists() throws IOException {
+    public boolean savesDirExists() throws IOException {
         return Files.exists(Path.of(GamePaths.SAVES_DIRECTORY));
     }
 }

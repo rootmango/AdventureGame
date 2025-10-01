@@ -1,10 +1,11 @@
 package entities.Enemies.CommonEnemies;
 
+import mvc.observers.EnemyObserver;
 import mvc.views.MainView;
 
 public class Undead extends CommonEnemy {
-    public Undead(MainView mainView) {
-        super(mainView);
+    public Undead(EnemyObserver enemyObserver) {
+        super(enemyObserver);
         name = "Undead";
         maxHealth = 65;
         currentHealth = maxHealth;
