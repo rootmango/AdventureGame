@@ -3,43 +3,54 @@ package game;
 import commands.SaveCommand;
 import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.controllers.MainController;
-import mvc.observers.CommandObserver;
-import mvc.observers.GameObserver;
-import mvc.views.CharacterView;
-import mvc.views.MainView;
-import mvc.views.PromptView;
-import mvc.views.QuestView;
+import mvc.controllers.CommandController;
+import mvc.views.*;
+import mvc.views.characterviews.CharacterView;
+import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.gameviews.GameViewInterface;
+import mvc.views.promptviews.PromptView;
 import playercharacter.*;
 import quests.Quest;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Game {
 
     protected final MainView mainView;
-    protected final MainController mainController;
+    protected final CommandController commandController;
     protected final CharacterView characterView;
-    protected final GameObserver gameObserver;
     protected final PromptView promptView;
     protected final QuestView questView;
-    protected final CommandObserver commandObserver;
+    protected final List<CommandViewInterface> commandViews;
     protected final GameSerialization gameSerialization;
     protected final GameTime gameTime;
+    protected final List<GameViewInterface> observers = new ArrayList<>();
 
-    public Game(MainView mainView, MainController mainController, CharacterView characterView,
-                GameObserver gameObserver, PromptView promptView, QuestView questView,
-                CommandObserver commandObserver, GameSerialization gameSerialization, GameTime gameTime) {
+    public void addObservers(List<GameViewInterface> observers) {
+        this.observers.addAll(observers);
+    }
+
+    public Game(MainView mainView, CharacterView characterView,
+                List<CommandViewInterface> commandViews,
+                GameSerialization gameSerialization, GameTime gameTime) {
         this.mainView = mainView;
-        this.mainController = mainController;
+        commandController = new CommandController();
         this.characterView = characterView;
-        this.gameObserver = gameObserver;
-        this.promptView = promptView;
-        this.questView = questView;
-        this.commandObserver = commandObserver;
+        promptView = new PromptView();
+        questView = new QuestView();
+        this.commandViews = commandViews;
         this.gameSerialization = gameSerialization;
         this.gameTime = gameTime;
+    }
+
+    public Game(MainView mainView, CharacterView characterView,
+                List<CommandViewInterface> commandViews,
+                GameSerialization gameSerialization, GameTime gameTime,
+                List<GameViewInterface> observers) {
+        this(mainView, characterView, commandViews, gameSerialization, gameTime);
+        this.observers.addAll(observers);
     }
 
     public void gameLoop(GameLoopCoreParams gameLoopCoreParams,
@@ -67,7 +78,7 @@ public class Game {
                 } catch (InterruptedException e) {
                     run = false;
                 } catch (IOException e) {
-                    gameObserver.generalIOError(e);
+                    observers.forEach(observer -> observer.onIOError(e));
                     run = false;
                 }
             }
@@ -77,10 +88,10 @@ public class Game {
 
         while (!won.getValue() && !dead.getValue() && !quit.getValue()) {
 
-            mainController.handleCommandInput(mainView, lock, gameLoopCoreParams,
+            commandController.handleCommandInput(mainView, lock, gameLoopCoreParams,
                                                 startTime, quit, promptView, questView,
-                                                characterView, commandObserver, gameSerialization,
-                                                gameTime);
+                                                characterView, gameSerialization,
+                                                commandViews, gameTime);
             synchronized (lock) {
                 questList.forEach(Quest::setOrUpdateCompleted);
                 if (character.isDead()) {
@@ -99,21 +110,22 @@ public class Game {
                                MutableBoolean dead, MutableBoolean quit, long startTime, String saveName,
                                CharacterView characterView, GameSerialization gameSerialization) {
         if (quit.getValue() == true) {
-            gameObserver.quitGame(character, characterView);
-            new SaveCommand(character, map, startTime, saveName, gameSerialization, gameTime).execute();
+            observers.forEach(observer -> observer.onQuit(character, characterView));
+            new SaveCommand(character, map, startTime, saveName, gameSerialization, gameTime, commandViews)
+                    .execute();
         } else if (won.getValue() == true) {
-            gameObserver.won(character, characterView, startTime);
+            observers.forEach(observer -> observer.onWon(character, characterView, startTime));
             try {
                 gameSerialization.deleteSave(saveName);
             } catch (IOException e) {
-                gameObserver.errorDeletingSave(e);
+                observers.forEach(observer -> observer.onErrorDeletingSave(e));
             }
         } else if (dead.getValue() == true) {
-            gameObserver.died(startTime);
+            observers.forEach(observer -> observer.onDied(startTime));
             try {
                 gameSerialization.deleteSave(saveName);
             } catch (IOException e) {
-                gameObserver.errorDeletingSave(e);
+                observers.forEach(observer -> observer.onErrorDeletingSave(e));
             }
         }
     }

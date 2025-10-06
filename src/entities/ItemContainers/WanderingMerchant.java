@@ -3,24 +3,28 @@ package entities.ItemContainers;
 import gamerandom.GameRNG;
 import items.Consumables.HealthPotion;
 import items.Consumables.ManaPotion;
-import mvc.observers.ItemObserver;
+import mvc.views.itemviews.ItemViewInterface;
+
+import java.util.List;
 
 public class WanderingMerchant extends ItemContainer {
-    public WanderingMerchant(ItemObserver itemObserver) {
-        super(itemObserver);
+    public WanderingMerchant() {
         name = "Wandering Merchant";
         messageWhenEmpty = "Wandering Merchant has no more items!";
     }
 
-    protected WanderingMerchant() {}
+    public WanderingMerchant(List<ItemViewInterface> observers) {
+        this();
+        this.observers.addAll(observers);
+    }
 
     @Override
     public void fill() {
         int random = GameRNG.randomInRange(1, 2);
         if (random == 1) {
-            list.add(new HealthPotion(itemObserver));
+            list.add(new HealthPotion(observers));
         } else if (random == 2) {
-            list.add(new ManaPotion(itemObserver));
+            list.add(new ManaPotion(observers));
         } else {
             throw new RuntimeException("Unexpected error");
         }

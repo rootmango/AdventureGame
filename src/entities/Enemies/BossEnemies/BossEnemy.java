@@ -2,16 +2,17 @@ package entities.Enemies.BossEnemies;
 
 import entities.Enemies.Enemy;
 import gamerandom.GameRNG;
-import mvc.observers.EnemyObserver;
-import mvc.views.MainView;
+import mvc.views.enemyviews.EnemyViewInterface;
 import playercharacter.PlayerCharacter;
+
+import java.util.List;
 
 public abstract class BossEnemy extends Enemy {
     protected int minAttack;
     protected int maxAttack;
 
-    public BossEnemy(EnemyObserver enemyObserver) {
-        super(enemyObserver);
+    public BossEnemy(List<EnemyViewInterface> observers) {
+        super(observers);
     }
 
     public BossEnemy() {}
@@ -26,7 +27,7 @@ public abstract class BossEnemy extends Enemy {
         if (currentHealth <= 0) {
             isDead = true;
             character.afterDefeatingBossEnemy();
-            enemyObserver.died(this);
+            observers.forEach(observer -> observer.onDied(this));
         }
     }
 }

@@ -1,14 +1,19 @@
 package items.Equipables;
 
-import mvc.observers.ItemObserver;
+import mvc.views.itemviews.ItemView;
+import mvc.views.itemviews.ItemViewInterface;
+
+import java.util.List;
 
 public class IronDagger extends Equipable {
-    public IronDagger(ItemObserver itemObserver) {
-        super(itemObserver);
+    public IronDagger() {
         attackAmount = 7;
         manaConsumptionAmount = 0;
         name = "Iron Dagger";
     }
 
-    protected IronDagger() {}
+    public IronDagger(List<ItemViewInterface> observers) {
+        this();
+        this.observers.addAll(observers);
+    }
 }

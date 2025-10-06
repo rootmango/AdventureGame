@@ -2,24 +2,25 @@ package entities.ItemContainers;
 
 import entities.Entity;
 import items.Item;
-import mvc.observers.ItemObserver;
-import mvc.views.ItemView;
+import mvc.views.itemviews.ItemViewInterface;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class ItemContainer extends Entity {
-    protected final ItemObserver itemObserver;
+    protected final transient List<ItemViewInterface> observers = new ArrayList<>();
 
-    public ItemContainer(ItemObserver itemObserver) {
-        this.itemObserver = itemObserver;
+    public ItemContainer(List<ItemViewInterface> observers) {
+        this.observers.addAll(observers);
+        list.forEach(item -> item.addObservers(observers));
     }
 
-    protected ItemContainer() {
-        // set only to avoid compiler error.
-        // this value doesn't matter, gson will still change it upon deserialization.
-        itemObserver = new ItemObserver(new ItemView());
+    public ItemContainer() {}
+
+    public void addObservers(List<ItemViewInterface> observers) {
+        this.observers.addAll(observers);
+        list.forEach(item -> item.addObservers(observers));
     }
 
     protected List<Item> list = new ArrayList<>();

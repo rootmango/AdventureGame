@@ -1,11 +1,11 @@
 package entities.Enemies.BossEnemies;
 
-import mvc.observers.EnemyObserver;
-import mvc.views.MainView;
+import mvc.views.enemyviews.EnemyViewInterface;
+
+import java.util.List;
 
 public class GoblinKing extends BossEnemy {
-    public GoblinKing(EnemyObserver enemyObserver) {
-        super(enemyObserver);
+    public GoblinKing() {
         name = "Goblin King";
         maxHealth = 150;
         currentHealth = maxHealth;
@@ -15,5 +15,8 @@ public class GoblinKing extends BossEnemy {
         deathMessage = "You have defeated the Goblin King!";
     }
 
-    protected GoblinKing() {}
+    public GoblinKing(List<EnemyViewInterface> observers) {
+        this();
+        this.observers.addAll(observers);
+    }
 }

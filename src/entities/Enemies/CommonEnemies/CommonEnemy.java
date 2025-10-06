@@ -1,14 +1,15 @@
 package entities.Enemies.CommonEnemies;
 
 import entities.Enemies.Enemy;
-import mvc.observers.EnemyObserver;
-import mvc.views.MainView;
+import mvc.views.enemyviews.EnemyViewInterface;
+
+import java.util.List;
 
 public abstract class CommonEnemy extends Enemy {
     protected int attack;
 
-    public CommonEnemy(EnemyObserver enemyObserver) {
-        super(enemyObserver);
+    public CommonEnemy(List<EnemyViewInterface> observers) {
+        super(observers);
     }
 
     public CommonEnemy() {}

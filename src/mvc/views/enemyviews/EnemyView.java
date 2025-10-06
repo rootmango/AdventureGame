@@ -1,19 +1,19 @@
-package mvc.views;
+package mvc.views.enemyviews;
 
 import entities.Enemies.Enemy;
-import playercharacter.PlayerCharacter;
+import mvc.views.MainView;
 
-public class EnemyView extends MainView {
-    public void showDeathMessage(Enemy enemy) {
+public class EnemyView extends MainView implements EnemyViewInterface {
+    public void onDied(Enemy enemy) {
         outputln(enemy.getDeathMessage());
     }
 
-    public void showGetAttackedMessage(Enemy enemy, int attackAmount) {
+    public void onGotAttacked(Enemy enemy, int attackAmount) {
         String enemyName = enemy.getName();
         outputln("You attack " + enemyName + " for " + attackAmount + " damage");
     }
 
-    public void showAttackMessage(Enemy enemy, int attackAmount) {
+    public void onAttacked(Enemy enemy, int attackAmount) {
         String enemyName = enemy.getName();
         int currentHealth = enemy.getCurrentHealth();
         outputln(enemyName + " attacks back for " + attackAmount + " damage");

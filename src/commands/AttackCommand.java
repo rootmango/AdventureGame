@@ -1,8 +1,12 @@
 package commands;
 
 import entities.Enemies.Enemy;
+import gameexceptions.InsufficientCommandArgsException;
 import maps.Place;
+import mvc.views.commandviews.CommandView;
+import mvc.views.commandviews.CommandViewInterface;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class AttackCommand extends Command {
@@ -10,10 +14,14 @@ public class AttackCommand extends Command {
         super(commandParams);
     }
 
+    public AttackCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+        super(commandParams, commandViews);
+    }
+
     @Override
     public void execute() {
         if (args.length == 0) {
-            commandObserver.requestedHelp();
+            throw new InsufficientCommandArgsException();
         } else {
             synchronized (lock) {
                 String enemyName = getSubjectNameFromCommandArgs(args);
@@ -29,7 +37,7 @@ public class AttackCommand extends Command {
                         currentPlace.getEnemies().remove(enemy);
                     }
                 } catch (NoSuchElementException e) {
-                    commandObserver.requestedNonExistingEnemy();
+                    commandViews.forEach(CommandViewInterface::showNoSuchEnemyMessage);
                 }
             }
         }

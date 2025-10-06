@@ -1,11 +1,11 @@
 package entities.Enemies.CommonEnemies;
 
-import mvc.observers.EnemyObserver;
-import mvc.views.MainView;
+import mvc.views.enemyviews.EnemyViewInterface;
+
+import java.util.List;
 
 public class Undead extends CommonEnemy {
-    public Undead(EnemyObserver enemyObserver) {
-        super(enemyObserver);
+    public Undead() {
         name = "Undead";
         maxHealth = 65;
         currentHealth = maxHealth;
@@ -14,5 +14,8 @@ public class Undead extends CommonEnemy {
         deathMessage = "Undead has died... Hopefully for good this time!";
     }
 
-    protected Undead() {}
+    public Undead(List<EnemyViewInterface> observers) {
+        this();
+        this.observers.addAll(observers);
+    }
 }

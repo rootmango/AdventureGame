@@ -8,21 +8,16 @@ import items.Equipables.Equipable;
 import items.Item;
 import maps.GameMap;
 import maps.Place;
-import mvc.observers.CharacterObserver;
-import mvc.observers.PlaceObserver;
-import mvc.views.CharacterView;
-import mvc.views.GameMapView;
-import mvc.views.MainView;
-import mvc.views.PlaceView;
+import mvc.views.characterviews.CharacterViewInterface;
+import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.placeviews.PlaceViewInterface;
 
 import java.io.Serializable;
 import java.util.*;
 
 public class PlayerCharacter implements Serializable {
-    private final MainView mainView;
-    private final GameMapView mapView;
-    private final CharacterObserver characterObserver;
-    private final PlaceObserver placeObserver;
+    private final transient List<CharacterViewInterface> characterObservers = new ArrayList<>();
+    private final transient List<PlaceViewInterface> placeObservers = new ArrayList<>();
 
     private int maxHealth;
     private int maxMana;
@@ -91,15 +86,28 @@ public class PlayerCharacter implements Serializable {
         return currentBossEnemyName;
     }
 
+    public void addCharacterObservers(List<CharacterViewInterface> characterObservers) {
+        this.characterObservers.addAll(characterObservers);
+    }
+
+    public void addPlaceObservers(List<PlaceViewInterface> observers) {
+        this.placeObservers.addAll(observers);
+    }
+
+    public void addItemObservers(List<ItemViewInterface> observers) {
+        itemList.forEach(item -> item.addObservers(observers));
+        equippedItem.forEach(item -> item.addObservers(observers));
+    }
+
 
     public void increaseHealth(int amount) {
         if (currentHealth + amount >= maxHealth) {
             int increasedAmount = maxHealth - currentHealth;
             currentHealth = maxHealth;
-            characterObserver.increasedHealth(this, increasedAmount);
+            characterObservers.forEach(observer -> observer.onHealthIncreased(increasedAmount));
         } else {
             currentHealth += amount;
-            characterObserver.increasedHealth(this, amount);
+            characterObservers.forEach(observer -> observer.onHealthIncreased(amount));
         }
     }
 
@@ -107,10 +115,10 @@ public class PlayerCharacter implements Serializable {
         if (currentMana + amount >= maxMana) {
             int increasedAmount = maxMana - currentMana;
             currentMana = maxMana;
-            characterObserver.increasedMana(this, increasedAmount);
+            characterObservers.forEach(observer -> observer.onManaIncreased(increasedAmount));
         } else {
             currentMana += amount;
-            characterObserver.increasedMana(this, amount);
+            characterObservers.forEach(observer -> observer.onManaIncreased(amount));
         }
     }
 
@@ -127,8 +135,7 @@ public class PlayerCharacter implements Serializable {
                             "Rogue - More attack", "You have chosen rogue!"))
     ));
 
-    public PlayerCharacter(String characterTypeName, MainView mainView, GameMapView mapView,
-                           CharacterObserver characterObserver, PlaceObserver placeObserver) {
+    public PlayerCharacter(String characterTypeName) {
         if (characterTypes.containsKey(characterTypeName.toLowerCase())) {
             CharacterStats stats = characterTypes.get(characterTypeName.toLowerCase());
             maxHealth = stats.maxHealth();
@@ -137,13 +144,22 @@ public class PlayerCharacter implements Serializable {
             currentMana = maxMana;
             minAttack = stats.minAttack();
             maxAttack = stats.maxAttack();
-            this.mainView = mainView;
-            this.mapView = mapView;
-            this.characterObserver = characterObserver;
-            this.placeObserver = placeObserver;
         } else {
             throw new RuntimeException();
         }
+    }
+
+    public PlayerCharacter(String characterTypeName,
+                           List<CharacterViewInterface> characterObservers) {
+        this(characterTypeName);
+        this.characterObservers.addAll(characterObservers);
+    }
+
+    public PlayerCharacter(String characterTypeName,
+                           List<CharacterViewInterface> characterObservers,
+                           List<PlaceViewInterface> placeObservers) {
+        this(characterTypeName, characterObservers);
+        this.placeObservers.addAll(placeObservers);
     }
 
     /**
@@ -152,10 +168,7 @@ public class PlayerCharacter implements Serializable {
      * fields during deserialization.
      */
     protected PlayerCharacter() {
-        mainView = new MainView();
-        mapView = new GameMapView();
-        characterObserver = new CharacterObserver(new CharacterView(mapView));
-        placeObserver = new PlaceObserver(new PlaceView());
+//        characterObservers = new ArrayList<>();
     }
 
 
@@ -185,14 +198,14 @@ public class PlayerCharacter implements Serializable {
 
 
     public void look(GameMap map) {
-        characterObserver.looked(this, map);
+        characterObservers.forEach(observer -> observer.showCurrentPlaceEntitiesInfo(this, map));
     }
 
 
 
     public void move(GameMap map, Direction direction) {
         if (isFightingBossEnemy()) {
-            characterObserver.triedEscaping(this);
+            characterObservers.forEach(observer -> observer.onFailedEscape(this));
         } else {
             int nextPlaceX = -1;
             int nextPlaceY = -1;
@@ -213,7 +226,7 @@ public class PlayerCharacter implements Serializable {
             Place nextPlace = map.at(nextPlaceX, nextPlaceY);
 
             if (nextPlace.isBorder() || nextPlace.isLocked()) {
-                placeObserver.attemptedEntryInaccessiblePlace(nextPlace);
+                placeObservers.forEach(observer -> observer.showInaccessibleMessage(nextPlace));
             } else {
                 if (nextPlace.isFortress()) {
                     if (nextPlace.containsBossEnemy()) {
@@ -222,13 +235,9 @@ public class PlayerCharacter implements Serializable {
                 }
                 this.xCoordinate = nextPlaceX;
                 this.yCoordinate = nextPlaceY;
-                placeObserver.enteredPlace(nextPlace);
+                placeObservers.forEach(observer -> observer.showEntryMessage(nextPlace));
             }
         }
-    }
-
-    public void locationOnMap(GameMap map) {
-        characterObserver.requestedLocationOnMap(this, map);
     }
 
     public void removeFromItemList(Item item) {
@@ -264,7 +273,7 @@ public class PlayerCharacter implements Serializable {
             throw new AnotherItemAlreadyEquippedException();
         } else {
             equippedItem.add(equipable);
-            characterObserver.equipped(equipable);
+            characterObservers.forEach(observer -> observer.onEquipped(equipable));
         }
     }
 
@@ -273,7 +282,7 @@ public class PlayerCharacter implements Serializable {
             throw new NoEquippedItemException();
         } else {
             Equipable equipable = equippedItem.removeFirst();
-            characterObserver.unequipped(equipable);
+            characterObservers.forEach(observer -> observer.onUnequipped(equipable));
             itemList.add(equipable);
         }
     }
@@ -284,9 +293,9 @@ public class PlayerCharacter implements Serializable {
                 item -> {
                     item.setOwner(this);
                     itemList.add(item);
-                    characterObserver.itemTaken(item);
+                    characterObservers.forEach(observer -> observer.onItemTaken(item));
                 },
-                () -> characterObserver.accessedEmptyItemContainer(container)
+                () -> characterObservers.forEach(observer -> observer.onEmptyItemContainer(container))
                 );
     }
 

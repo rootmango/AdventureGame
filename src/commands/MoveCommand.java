@@ -1,7 +1,11 @@
 package commands;
 
+import gameexceptions.InsufficientCommandArgsException;
+import mvc.views.commandviews.CommandView;
+import mvc.views.commandviews.CommandViewInterface;
 import playercharacter.Direction;
 
+import java.util.List;
 import java.util.Set;
 
 public class MoveCommand extends Command {
@@ -46,23 +50,27 @@ public class MoveCommand extends Command {
         super(commandParams);
     }
 
+    public MoveCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+        super(commandParams, commandViews);
+    }
+
     @Override
     public void execute() {
         if (args.length == 0) {
-            commandObserver.requestedHelp();
+            throw new InsufficientCommandArgsException();
         } else {
             synchronized (lock) {
                 if (checkUp(args[0])) {
-                    commandObserver.movedNorth();
+                    commandViews.forEach(CommandViewInterface::showMoveNorthMessage);
                     character.move(map, Direction.UP);
                 } else if (checkLeft(args[0])) {
-                    commandObserver.movedWest();
+                    commandViews.forEach(CommandViewInterface::showMoveWestMessage);
                     character.move(map, Direction.LEFT);
                 } else if (checkRight(args[0])) {
-                    commandObserver.movedEast();
+                    commandViews.forEach(CommandViewInterface::showMoveEastMessage);
                     character.move(map, Direction.RIGHT);
                 } else if (checkDown(args[0])) {
-                    commandObserver.movedSouth();
+                    commandViews.forEach(CommandViewInterface::showMoveSouthMessage);
                     character.move(map, Direction.DOWN);
                 }
             }

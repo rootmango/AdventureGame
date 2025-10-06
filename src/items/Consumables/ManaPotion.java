@@ -1,13 +1,18 @@
 package items.Consumables;
 
-import mvc.observers.ItemObserver;
+import mvc.views.itemviews.ItemView;
+import mvc.views.itemviews.ItemViewInterface;
+
+import java.util.List;
 
 public class ManaPotion extends Consumable {
-    public ManaPotion(ItemObserver itemObserver) {
-        super(itemObserver);
+    public ManaPotion() {
         name = "Mana Potion";
         currentManaIncreaseAmount = 20;
     }
 
-    protected ManaPotion() {}
+    public ManaPotion(List<ItemViewInterface> observers) {
+        this();
+        this.observers.addAll(observers);
+    }
 }

@@ -3,10 +3,10 @@ package maps;
 import gameexceptions.CharacterNotFoundException;
 import gameexceptions.UnrecognizedCharException;
 import gameio.MapIO;
-import gamerandom.GameRandom;
-import mvc.observers.EnemyObserver;
-import mvc.observers.ItemObserver;
-import mvc.views.MainView;
+import gamerandom.RandomCommonEnemyGenerator;
+import gamerandom.RandomItemContainerGenerator;
+import mvc.views.enemyviews.EnemyViewInterface;
+import mvc.views.itemviews.ItemViewInterface;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,9 +20,10 @@ import java.util.stream.Stream;
 public class GameMap implements Serializable {
     private final Place[][] placesArray;
 
-    public GameMap(EnemyObserver enemyObserver, ItemObserver itemObserver,
-                   GameRandom gameRandom) throws IOException {
-        placesArray = fillMap(enemyObserver, itemObserver, gameRandom);
+    public GameMap(List<EnemyViewInterface> enemyObservers,
+                   RandomCommonEnemyGenerator randomCommonEnemyGenerator,
+                   RandomItemContainerGenerator randomItemContainerGenerator) throws IOException {
+        placesArray = fillMap(enemyObservers, randomCommonEnemyGenerator, randomItemContainerGenerator);
     }
 
     /**
@@ -40,9 +41,9 @@ public class GameMap implements Serializable {
         this.placesArray = placesArray;
     }
 
-    public Place getFortress(GameMap map) {
+    public Place getFortress() {
         Place fortress = Arrays.stream(
-                    map.fullMapStream()
+                    this.fullMapStream()
                         .filter(x -> Arrays.stream(x).anyMatch(Place::isFortress))
                         .findFirst()
                         .orElseThrow(UnrecognizedCharException::new)
@@ -56,19 +57,40 @@ public class GameMap implements Serializable {
         return fortress;
     }
 
-    public Place[][] fillMap(EnemyObserver enemyObserver, ItemObserver itemObserver,
-                             GameRandom gameRandom) throws IOException {
+    public Place[][] fillMap(List<EnemyViewInterface> enemyObservers,
+                             RandomCommonEnemyGenerator randomCommonEnemyGenerator,
+                             RandomItemContainerGenerator randomItemContainerGenerator) throws IOException {
         MapIO mapIO = new MapIO();
         List<String> lines = mapIO.randomMap();
         Place[][] array = new Place[lines.size()][lines.getFirst().length()];
         for (int i = 0; i < lines.size(); i++) {
             for (int j = 0; j < lines.get(i).length(); j++) {
                 char c = lines.get(i).charAt(j);
-                array[i][j] = new Place(j, i, c, enemyObserver, itemObserver, gameRandom);
+                array[i][j] = new Place(j, i, c, enemyObservers,
+                        randomCommonEnemyGenerator, randomItemContainerGenerator);
             }
         }
 
         return array;
+    }
+
+    public void addEnemyObservers(List<EnemyViewInterface> observers) {
+        for (int i = 0; i < placesArray.length; i++) {
+            for (int j = 0; j < placesArray[0].length; j++) {
+                Place place = placesArray[i][j];
+                place.getEnemies().forEach(enemy -> enemy.addObservers(observers));
+            }
+        }
+    }
+
+    public void addItemObservers(List<ItemViewInterface> observers) {
+        for (int i = 0; i < placesArray.length; i++) {
+            for (int j = 0; j < placesArray[0].length; j++) {
+                Place place = placesArray[i][j];
+                place.getItemContainers()
+                        .forEach(itemContainer -> itemContainer.addObservers(observers));
+            }
+        }
     }
 
     public Place at(int xCoordinate, int yCoordinate) {

@@ -6,19 +6,25 @@ import commands.CommandParameters;
 import game.GameLoopCoreParams;
 import game.GameTime;
 import game.MutableBoolean;
+import gameexceptions.EmptyCommandNameException;
+import gameexceptions.InsufficientCommandArgsException;
 import gameexceptions.InvalidCommandNameException;
 import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.observers.CommandObserver;
 import mvc.views.*;
+import mvc.views.characterviews.CharacterView;
+import mvc.views.commandviews.CommandView;
+import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.promptviews.PromptView;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainController {
-    public String getCommandFromInputArgs(String[] inputArgs) {
+public class CommandController {
+    protected String getCommandFromInputArgs(String[] inputArgs) {
         if (inputArgs.length == 0) {
             return "";
         } else {
@@ -26,7 +32,7 @@ public class MainController {
         }
     }
 
-    public String[] getCommandArgsFromInputArgs(String[] inputArgs) {
+    protected String[] getCommandArgsFromInputArgs(String[] inputArgs) {
         return Arrays.copyOfRange(inputArgs, 1, inputArgs.length);
     }
 
@@ -34,8 +40,8 @@ public class MainController {
                                    GameLoopCoreParams gameLoopCoreParams,
                                    long startTime, MutableBoolean quit, PromptView promptView,
                                    QuestView questView, CharacterView characterView,
-                                   CommandObserver commandObserver, GameSerialization gameSerialization,
-                                   GameTime gameTime) {
+                                   GameSerialization gameSerialization,
+                                   List<CommandViewInterface> commandViews, GameTime gameTime) {
 
         PlayerCharacter character = gameLoopCoreParams.character();
         GameMap map = gameLoopCoreParams.map();
@@ -51,15 +57,19 @@ public class MainController {
             String[] args = getCommandArgsFromInputArgs(inputArgs);
 
             var commandParams = new CommandParameters(questView, characterView,
-                    commandObserver, character, map, questList, startTime, saveName,
+                    character, map, questList, startTime, saveName,
                     quit, gameSerialization, gameTime, lock, args);
 
             try {
                 var commandFactory = new CommandFactory();
-                Command command = commandFactory.createCommand(commandName, commandParams);
+                Command command = commandFactory.createCommand(commandName, commandParams, commandViews);
                 command.execute();
             } catch (InvalidCommandNameException e) {
-                mainView.outputln("Error: " + e.getMessage());
+                mainView.outputln("Invalid command name!");
+            } catch (EmptyCommandNameException e) {
+                mainView.outputln("Command name cannot be empty!");
+            } catch (InsufficientCommandArgsException e) {
+                commandViews.forEach(CommandViewInterface::showHelpCommands);
             }
         }
 

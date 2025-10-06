@@ -1,12 +1,12 @@
 package mvc.controllers;
 
-import mvc.observers.PromptObserver;
-import mvc.views.CharacterView;
-import mvc.views.GameSaveView;
-import mvc.views.MainView;
-import mvc.views.PromptYesNoValidation;
+import mvc.views.*;
+import mvc.views.characterviews.CharacterView;
+import mvc.views.promptviews.PromptView;
+import mvc.views.promptviews.PromptViewInterface;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PromptController {
@@ -15,33 +15,33 @@ public class PromptController {
     protected final GameSaveView gameSaveView;
     protected final CharacterView characterView;
     protected final PromptYesNoValidation promptYesNoValidation;
-    protected final PromptObserver promptObserver;
+    protected final List<PromptViewInterface> promptViews = new ArrayList<>();
+
+    public void addPromptViews(List<PromptViewInterface> promptViews) {
+        this.promptViews.addAll(promptViews);
+    }
 
     public PromptController(MainView mainView, GameSaveView gameSaveView, CharacterView characterView,
-                            PromptYesNoValidation promptYesNoValidation, PromptObserver promptObserver) {
+                            PromptYesNoValidation promptYesNoValidation) {
         this.mainView = mainView;
         this.gameSaveView = gameSaveView;
         this.characterView = characterView;
         this.promptYesNoValidation = promptYesNoValidation;
-        this.promptObserver = promptObserver;
+    }
+
+    public PromptController(MainView mainView, GameSaveView gameSaveView, CharacterView characterView,
+                            PromptYesNoValidation promptYesNoValidation, List<PromptViewInterface> promptViews) {
+        this(mainView, gameSaveView, characterView, promptYesNoValidation);
+        this.promptViews.addAll(promptViews);
     }
 
     /**
      * Prompts for whether a new game should be started and returns the answer.
      */
     public boolean promptNewGame() throws IOException {
-        boolean isValidInput = false;
-        String answer = "";
-        promptObserver.promptedStartNewGame();
-        while (!isValidInput) {
-            answer = mainView.userInputString();
-            isValidInput = promptYesNoValidation.isValidInput(answer);
-            if (!isValidInput) {
-                promptObserver.promptedStartNewGameWithHint();
-            }
-        }
 
-        if (promptYesNoValidation.isYes(answer)) {
+
+        /*if (promptYesNoValidation.isYes(answer)) {
             return true;
         } else {
             // if we are out of the while loop, then answer is necessarily in one of
@@ -54,6 +54,32 @@ public class PromptController {
             } else {
                 return false;
             }
+        }*/
+
+        if (gameSaveView.savesDirIsEmpty()) {
+            promptViews.forEach(PromptViewInterface::showNoExistingSavesMessage);
+            return true;
+        } else {
+            boolean isValidInput = false;
+            String answer = "";
+            promptViews.forEach(PromptViewInterface::askStartNewGame);
+            while (!isValidInput) {
+                answer = mainView.userInputString();
+                isValidInput = promptYesNoValidation.isValidInput(answer);
+                if (!isValidInput) {
+                    promptViews.forEach(PromptViewInterface::askStartNewGameWithHint);
+                }
+            }
+
+            if (promptYesNoValidation.isYes(answer)) {
+                return true;
+            } else {
+                // if we are out of the while loop, then answer is necessarily in one of
+                // promptYesNoView's two sets of either "yes" or "no" answers.
+                // Since we're in the else block (answer is not in the "yes" set),
+                // answer is in the "no" set.
+                return false;
+            }
         }
     }
 
@@ -64,10 +90,10 @@ public class PromptController {
         List<String> availableSavesNames = gameSaveView.showAvailableSavesNames();
         String answer = "";
         while (!availableSavesNames.contains(answer)) {
-            promptObserver.promptedChooseSave();
+            promptViews.forEach(PromptViewInterface::showChooseSaveMessage);
             answer = mainView.userInputString();
             if (!availableSavesNames.contains(answer)) {
-                promptObserver.noSuchSave();
+                promptViews.forEach(PromptViewInterface::showNoSuchSaveMessage);
             }
         }
 
@@ -85,15 +111,15 @@ public class PromptController {
      */
     public String promptNewSaveName() throws IOException {
         String saveName = "";
-        promptObserver.promptedSaveName();
+        promptViews.forEach(PromptViewInterface::askSaveName);
         while (saveName.isEmpty()) {
             String input = mainView.userInputString();
             boolean isValidInput = gameSaveView.isValidNewSaveName(input);
             boolean isTakenSaveName = gameSaveView.saveNameIsTaken(input);
             if (!isValidInput) {
-                promptObserver.enteredInvalidSaveNameIllegalChars();
+                promptViews.forEach(PromptViewInterface::showInvalidSaveNameIllegalCharsMessage);
             } else if (isTakenSaveName) {
-                promptObserver.enteredInvalidSaveNameTaken();
+                promptViews.forEach(PromptViewInterface::showInvalidSaveNameTakenMessage);
             } else {
                 saveName = input;
             }
@@ -103,7 +129,7 @@ public class PromptController {
     }
 
     public String promptCharacterType() {
-        promptObserver.promptedCharacterType();
+        promptViews.forEach(PromptViewInterface::askCharacterType);
         characterView.showCharacterTypeNames();
         String answer = "";
         boolean isValidCharacterTypeName = false;
@@ -111,7 +137,7 @@ public class PromptController {
             answer = mainView.userInputString();
             isValidCharacterTypeName = characterView.isValidCharacterTypeName(answer);
             if (!isValidCharacterTypeName) {
-                promptObserver.enteredInvalidCharacterType();
+                promptViews.forEach(PromptViewInterface::showInvalidCharacterTypeMessage);
             }
         }
         characterView.showOnChosenCharacterType(answer);

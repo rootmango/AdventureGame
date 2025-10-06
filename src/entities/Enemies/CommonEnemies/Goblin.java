@@ -1,11 +1,11 @@
 package entities.Enemies.CommonEnemies;
 
-import mvc.observers.EnemyObserver;
-import mvc.views.MainView;
+import mvc.views.enemyviews.EnemyViewInterface;
+
+import java.util.List;
 
 public class Goblin extends CommonEnemy {
-    public Goblin(EnemyObserver enemyObserver) {
-        super(enemyObserver);
+    public Goblin() {
         name = "Goblin";
         maxHealth = 50;
         currentHealth = maxHealth;
@@ -14,5 +14,8 @@ public class Goblin extends CommonEnemy {
         deathMessage = "Goblin has died";
     }
 
-    protected Goblin() {}
+    public Goblin(List<EnemyViewInterface> observers) {
+        this();
+        this.observers.addAll(observers);
+    }
 }

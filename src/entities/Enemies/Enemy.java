@@ -1,13 +1,15 @@
 package entities.Enemies;
 
 import entities.Entity;
-import mvc.observers.EnemyObserver;
-import mvc.views.EnemyView;
-import mvc.views.MainView;
+import mvc.views.enemyviews.EnemyView;
+import mvc.views.enemyviews.EnemyViewInterface;
 import playercharacter.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public abstract class Enemy extends Entity {
-    protected final EnemyObserver enemyObserver;
+    protected final transient List<EnemyViewInterface> observers = new ArrayList<>();
 
     protected int maxHealth;
     protected int currentHealth;
@@ -15,8 +17,14 @@ public abstract class Enemy extends Entity {
     protected boolean isDead = false;
     protected String deathMessage;
 
-    public Enemy(EnemyObserver enemyObserver) {
-        this.enemyObserver = enemyObserver;
+    public Enemy(List<EnemyViewInterface> observers) {
+        this.observers.addAll(observers);
+    }
+
+    public Enemy() {}
+
+    public void addObservers(List<EnemyViewInterface> observers) {
+        this.observers.addAll(observers);
     }
 
     public int getXP() {
@@ -31,17 +39,6 @@ public abstract class Enemy extends Entity {
         return currentHealth;
     }
 
-    /**
-     * Only used for gson's deserialization - gson requires a class to have an (either
-     * public or protected) no-args constructor to automatically set all of its
-     * fields during deserialization.
-     */
-    public Enemy() {
-        // set only to avoid compiler error.
-        // this value doesn't matter, gson will still change it upon deserialization.
-        enemyObserver = new EnemyObserver(new EnemyView());
-    }
-
     public abstract int attackAmount();
 
     /**
@@ -51,7 +48,7 @@ public abstract class Enemy extends Entity {
     protected void checkAndSetIfDead(PlayerCharacter character) {
         if (currentHealth <= 0) {
             isDead = true;
-            enemyObserver.died(this);
+            observers.forEach(observer -> observer.onDied(this));
         }
     }
 
@@ -62,13 +59,13 @@ public abstract class Enemy extends Entity {
     private void characterAttack(PlayerCharacter character) {
         int characterAttackAmount = character.attackAmount();
         currentHealth -= characterAttackAmount;
-        enemyObserver.gotAttacked(this, characterAttackAmount);
+        observers.forEach(observer -> observer.onGotAttacked(this, characterAttackAmount));
     }
 
     private void characterReceiveAttack(PlayerCharacter character) {
         int attackAmount = this.attackAmount();
         character.subtractHealth(attackAmount);
-        enemyObserver.attacked(this, attackAmount);
+        observers.forEach(observer -> observer.onAttacked(this, attackAmount));
     }
 
     public void getAttacked(PlayerCharacter character) {

@@ -1,16 +1,18 @@
-package mvc.views;
+package mvc.views.characterviews;
 
 import entities.ItemContainers.ItemContainer;
 import items.Equipables.Equipable;
 import items.Item;
 import maps.GameMap;
+import mvc.views.GameMapView;
+import mvc.views.MainView;
 import playercharacter.PlayerCharacter;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class CharacterView extends MainView {
+public class CharacterView extends MainView implements CharacterViewInterface {
     protected final GameMapView mapView;
 
     public CharacterView(GameMapView mapView) {
@@ -46,32 +48,32 @@ public class CharacterView extends MainView {
         return validCharacterTypeNames.contains(characterTypeName.toLowerCase().strip());
     }
 
-    public void showUnequippedMessage(Equipable equipable) {
+    public void onUnequipped(Equipable equipable) {
         outputln(("Unequipped " + equipable.getName()));
     }
 
-    public void showHealthIncreasedMessage(int increasedAmount) {
+    public void onHealthIncreased(int increasedAmount) {
         outputln("Health increased by " + increasedAmount);
     }
 
-    public void showManaIncreasedMessage(int increasedAmount) {
+    public void onManaIncreased(int increasedAmount) {
         outputln("Mana increased by " + increasedAmount);
     }
 
-    public void showFailedEscapeMessage(PlayerCharacter character) {
+    public void onFailedEscape(PlayerCharacter character) {
         String currentBossEnemyName = character.getCurrentBossEnemyName();
         outputln("Can't escape from this battle! Defeat " + currentBossEnemyName + " first!");
     }
 
-    public void showEquippedMessage(Equipable equipable) {
+    public void onEquipped(Equipable equipable) {
         outputln(equipable.getName() + " equipped");
     }
 
-    public void showTakenItemMessage(Item item) {
+    public void onItemTaken(Item item) {
         outputln(item.getName() + " taken");
     }
 
-    public void showEmptyItemContainerMessage(ItemContainer container) {
+    public void onEmptyItemContainer(ItemContainer container) {
         outputln(container.getMessageWhenEmpty());
     }
 
@@ -81,9 +83,7 @@ public class CharacterView extends MainView {
         outputln(mapView.entitiesInfoAt(map, xCoordinate, yCoordinate));
     }
 
-    public void showLocationOnMap(PlayerCharacter character, GameMap map) {
-        int xCoordinate = character.getXCoordinate();
-        int yCoordinate = character.getYCoordinate();
+    public void showLocationOnMap(int xCoordinate, int yCoordinate, GameMap map) {
         outputln("You are at (" + xCoordinate + ", " + yCoordinate + ") - " +
                 map.at(xCoordinate, yCoordinate).getName());
     }
@@ -92,15 +92,15 @@ public class CharacterView extends MainView {
         outputln(character.stats());
     }
 
-    public void showNoSuchItemInInventoryMessage() {
+    public void onNoSuchItemInInventory() {
         outputln("No such item in inventory");
     }
 
-    public void showNoSuchItemCurrentlyEquippedMessage() {
+    public void onNoSuchItemCurrentlyEquipped() {
         outputln("No item is currently equipped!");
     }
 
-    public void showCharacterEquippedItem(PlayerCharacter character) {
+    public void onAlreadyEquippedItem(PlayerCharacter character) {
         if (!character.hasEquippedItem()) {
             outputln("no equipped item");
         } else {

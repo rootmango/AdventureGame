@@ -4,20 +4,20 @@ import game.GameTime;
 import game.MutableBoolean;
 import gameio.GameSerialization;
 import maps.GameMap;
-import mvc.observers.CommandObserver;
-import mvc.views.CharacterView;
-import mvc.views.MainView;
-import mvc.views.QuestView;
+import mvc.views.*;
+import mvc.views.characterviews.CharacterView;
+import mvc.views.commandviews.CommandView;
+import mvc.views.commandviews.CommandViewInterface;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 public abstract class Command {
     protected final QuestView questView;
     protected final CharacterView characterView;
-    protected final CommandObserver commandObserver;
     protected final PlayerCharacter character;
     protected final GameMap map;
     protected final List<Quest> questList;
@@ -27,6 +27,7 @@ public abstract class Command {
     protected final GameSerialization gameSerialization;
     protected final GameTime gameTime;
     protected final Object lock;
+    protected final List<CommandViewInterface> commandViews = new ArrayList<>();
     protected final String[] args;
 
     public abstract void execute();
@@ -34,7 +35,6 @@ public abstract class Command {
     public Command(CommandParameters commandParams) {
         this.questView = commandParams.questView();
         this.characterView = commandParams.characterView();
-        this.commandObserver = commandParams.commandObserver();
         this.character = commandParams.character();
         this.map = commandParams.map();
         this.questList = commandParams.questList();
@@ -45,6 +45,15 @@ public abstract class Command {
         this.gameTime = commandParams.gameTime();
         this.lock = commandParams.lock();
         this.args = commandParams.args();
+    }
+
+    public Command(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+        this(commandParams);
+        this.commandViews.addAll(commandViews);
+    }
+
+    public void addCommandViews(List<CommandViewInterface> commandViews) {
+        this.commandViews.addAll(commandViews);
     }
 
     protected final String getSubjectNameFromCommandArgs(String[] commandArgs) {

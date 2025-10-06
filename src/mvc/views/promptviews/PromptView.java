@@ -1,6 +1,8 @@
-package mvc.views;
+package mvc.views.promptviews;
 
-public class PromptView extends MainView{
+import mvc.views.MainView;
+
+public class PromptView extends MainView implements PromptViewInterface {
     public void showPromptChar() {
         output("> ");
     }

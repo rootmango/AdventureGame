@@ -11,6 +11,10 @@ import items.Equipables.Equipable;
 import items.Item;
 import maps.GameMap;
 import maps.GameMapDeserializer;
+import mvc.views.characterviews.CharacterViewInterface;
+import mvc.views.enemyviews.EnemyViewInterface;
+import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.placeviews.PlaceViewInterface;
 import playercharacter.PlayerCharacter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,15 +27,21 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class GameSerialization {
-    public DeserializedBundle readFromSave(String saveName) throws IOException {
+    public DeserializedBundle readFromSave(String saveName,
+                                           List<CharacterViewInterface> characterObservers,
+                                           List<PlaceViewInterface> placeObservers,
+                                           List<ItemViewInterface> itemObservers,
+                                           List<EnemyViewInterface> enemyObservers) throws IOException {
         return new DeserializedBundle(
-                readPlayerCharacterFromSave(saveName),
-                readGameMapFromSave(saveName),
+                readPlayerCharacterFromSave(saveName, characterObservers, placeObservers, itemObservers),
+                readGameMapFromSave(saveName, itemObservers, enemyObservers),
                 readElapsedTimeFromSave(saveName)
         );
     }
 
-    public GameMap readGameMapFromSave(String saveName)
+    private GameMap readGameMapFromSave(String saveName,
+                                        List<ItemViewInterface> itemObservers,
+                                        List<EnemyViewInterface> enemyObservers)
             throws IOException {
 
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;
@@ -39,13 +49,19 @@ public class GameSerialization {
                 .registerTypeAdapter(GameMap.class, new GameMapDeserializer())
                 .registerTypeAdapter(Enemy.class, new EnemyDeserializer())
                 .create();
-        return gson.fromJson(
+        GameMap gameMap = gson.fromJson(
                 String.join("\n", Files.readAllLines(Path.of(savePath + "/game_map.json"))),
                 GameMap.class
         );
+        gameMap.addEnemyObservers(enemyObservers);
+        gameMap.addItemObservers(itemObservers);
+        return gameMap;
     }
 
-    public PlayerCharacter readPlayerCharacterFromSave(String saveName)
+    private PlayerCharacter readPlayerCharacterFromSave(String saveName,
+                                                        List<CharacterViewInterface> characterObservers,
+                                                        List<PlaceViewInterface> placeObservers,
+                                                        List<ItemViewInterface> itemObservers)
             throws IOException {
 
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;
@@ -59,10 +75,13 @@ public class GameSerialization {
                 PlayerCharacter.class
         );
         playerCharacter.setOwnerForAllItems();
+        playerCharacter.addCharacterObservers(characterObservers);
+        playerCharacter.addPlaceObservers(placeObservers);
+        playerCharacter.addItemObservers(itemObservers);
         return playerCharacter;
     }
 
-    public long readElapsedTimeFromSave(String saveName) throws IOException {
+    private long readElapsedTimeFromSave(String saveName) throws IOException {
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;
         var gson = new Gson();
         return gson.fromJson(

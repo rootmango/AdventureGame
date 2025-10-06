@@ -1,7 +1,11 @@
 package commands;
 
+import gameexceptions.InsufficientCommandArgsException;
 import maps.Place;
+import mvc.views.commandviews.CommandView;
+import mvc.views.commandviews.CommandViewInterface;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class TakeCommand extends Command{
@@ -9,10 +13,14 @@ public class TakeCommand extends Command{
         super(commandParams);
     }
 
+    public TakeCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+        super(commandParams, commandViews);
+    }
+
     @Override
     public void execute() {
         if (args.length == 0) {
-            commandObserver.requestedHelp();
+            throw new InsufficientCommandArgsException();
         } else {
             synchronized (lock) {
                 String itemContainerName = getSubjectNameFromCommandArgs(args);
@@ -20,7 +28,7 @@ public class TakeCommand extends Command{
                 try {
                     character.takeItemByName(currentPlace, itemContainerName);
                 } catch (NoSuchElementException e) {
-                    commandObserver.requestedNonExistingItemContainer();
+                    commandViews.forEach(CommandViewInterface::showNoSuchItemContainerMessage);
                 }
             }
         }

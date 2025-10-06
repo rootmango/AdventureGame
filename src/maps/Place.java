@@ -7,16 +7,13 @@ import entities.Enemies.Enemy;
 import entities.ItemContainers.ItemContainer;
 import gameexceptions.UnrecognizedCharException;
 import gamerandom.GameRNG;
-import gamerandom.GameRandom;
 import game.*;
-import mvc.observers.EnemyObserver;
-import mvc.observers.ItemObserver;
-import mvc.views.MainView;
+import gamerandom.RandomCommonEnemyGenerator;
+import gamerandom.RandomItemContainerGenerator;
+import mvc.views.enemyviews.EnemyViewInterface;
 
 import java.io.Serializable;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Place implements Serializable {
     private final int xCoordinate;
@@ -96,15 +93,17 @@ public class Place implements Serializable {
         return isBorder;
     }
 
-    public Place(int xCoordinate, int yCoordinate, char c, EnemyObserver enemyObserver,
-                 ItemObserver itemObserver, GameRandom gameRandom) throws UnrecognizedCharException {
+    public Place(int xCoordinate, int yCoordinate, char c, List<EnemyViewInterface> enemyObservers,
+                 RandomCommonEnemyGenerator randomCommonEnemyGenerator,
+                 RandomItemContainerGenerator randomItemContainerGenerator)
+            throws UnrecognizedCharException {
         this.xCoordinate = xCoordinate;
         this.yCoordinate = yCoordinate;
         symbol = c;
         if (PLACES.containsKey(c)) {
             name = PLACES.get(c).name();
             description = PLACES.get(c).description();
-            seed(enemyObserver, itemObserver, gameRandom);
+            seed(randomCommonEnemyGenerator, randomItemContainerGenerator);
         } else if (c == 'E') {
             name = "Entry";
             description = "entry placeholder";
@@ -114,7 +113,7 @@ public class Place implements Serializable {
             isFortress = true;
             isLocked = true;
             inaccessibleMessage = "Fortress is currently locked! You can't enter it right now!";
-            seedWithGoblinKing(enemyObserver);
+            seedWithGoblinKing(enemyObservers);
         } else if (c == '0') {
             name = "Border";
             description = "border placeholder";
@@ -143,7 +142,8 @@ public class Place implements Serializable {
     /**
      * Fills the current place with a random number of distinct item containers and enemies.
      */
-    private void seed(EnemyObserver enemyObserver, ItemObserver itemObserver, GameRandom gameRandom) {
+    private void seed(RandomCommonEnemyGenerator randomCommonEnemyGenerator,
+                      RandomItemContainerGenerator randomItemContainerGenerator) {
         // For simplicity of the game interface's sake, each place may not contain more than one type
         // of enemy or item container.
         //
@@ -159,7 +159,7 @@ public class Place implements Serializable {
         int enemiesCount = GameRNG.randomInRange(1, 3);
         int enemiesIterator = 0;
         do {
-            Enemy enemy = gameRandom.randomEnemy(enemyObserver);
+            Enemy enemy = randomCommonEnemyGenerator.generate();
             if (!enemies.contains(enemy)) {
                 enemies.add(enemy);
                 enemiesIterator++;
@@ -169,7 +169,7 @@ public class Place implements Serializable {
         int itemContainersCount = GameRNG.randomInRange(1, 1);
         int containersIterator = 0;
         do {
-            ItemContainer itemContainer = gameRandom.randomItemContainer(itemObserver);
+            ItemContainer itemContainer = randomItemContainerGenerator.generate();
             if (!itemContainers.contains(itemContainer)) {
                 itemContainers.add(itemContainer);
                 containersIterator++;
@@ -177,8 +177,8 @@ public class Place implements Serializable {
         } while (containersIterator < itemContainersCount);
     }
 
-    private void seedWithGoblinKing(EnemyObserver enemyObserver) {
-        enemies.add(new GoblinKing(enemyObserver));
+    private void seedWithGoblinKing(List<EnemyViewInterface> enemyObservers) {
+        enemies.add(new GoblinKing(enemyObservers));
     }
 
     public boolean isLocked() {

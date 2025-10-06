@@ -1,13 +1,18 @@
 package items.Consumables;
 
-import mvc.observers.ItemObserver;
+import mvc.views.itemviews.ItemView;
+import mvc.views.itemviews.ItemViewInterface;
+
+import java.util.List;
 
 public class HealthPotion extends Consumable {
-    public HealthPotion(ItemObserver itemObserver) {
-        super(itemObserver);
+    public HealthPotion() {
         name = "Health Potion";
         currentHealthIncreaseAmount = 20;
     }
 
-    protected HealthPotion() {}
+    public HealthPotion(List<ItemViewInterface> observers) {
+        this();
+        this.observers.addAll(observers);
+    }
 }
