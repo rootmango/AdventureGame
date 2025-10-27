@@ -1,7 +1,6 @@
 package items.Equipables;
 
-import mvc.views.itemviews.ItemView;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.itemviews.ItemObserver;
 
 import java.util.List;
 
@@ -12,7 +11,7 @@ public class Staff extends Equipable {
         name = "Staff";
     }
 
-    public Staff(List<ItemViewInterface> observers) {
+    public Staff(List<ItemObserver> observers) {
         this();
         this.observers.addAll(observers);
     }

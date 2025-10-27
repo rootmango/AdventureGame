@@ -5,15 +5,15 @@ import entities.Enemies.CommonEnemies.Ogre;
 import entities.Enemies.CommonEnemies.Thief;
 import entities.Enemies.CommonEnemies.Undead;
 import entities.Enemies.Enemy;
-import mvc.views.enemyviews.EnemyViewInterface;
+import mvc.views.enemyviews.EnemyObserver;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RandomCommonEnemyGenerator implements RandomEntityGenerator {
-    protected final List<EnemyViewInterface> observers = new ArrayList<>();
+    protected final List<EnemyObserver> observers = new ArrayList<>();
 
-    public RandomCommonEnemyGenerator(List<EnemyViewInterface> observers) {
+    public RandomCommonEnemyGenerator(List<EnemyObserver> observers) {
         this.observers.addAll(observers);
     }
 

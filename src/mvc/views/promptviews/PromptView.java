@@ -2,7 +2,7 @@ package mvc.views.promptviews;
 
 import mvc.views.MainView;
 
-public class PromptView extends MainView implements PromptViewInterface {
+public class PromptView extends MainView implements PromptEventListener {
     public void showPromptChar() {
         output("> ");
     }
@@ -28,7 +28,6 @@ public class PromptView extends MainView implements PromptViewInterface {
 
     public void showNoSuchSaveMessage() {
         outputln("No save with such name!");
-        showPromptChar();
     }
 
     public void askSaveName() {

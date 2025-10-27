@@ -6,8 +6,8 @@ import maps.GameMap;
 import mvc.controllers.CommandController;
 import mvc.views.*;
 import mvc.views.characterviews.CharacterView;
-import mvc.views.commandviews.CommandViewInterface;
-import mvc.views.gameviews.GameViewInterface;
+import mvc.views.commandviews.CommandEventListener;
+import mvc.views.gameviews.GameObserver;
 import mvc.views.promptviews.PromptView;
 import playercharacter.*;
 import quests.Quest;
@@ -23,17 +23,17 @@ public class Game {
     protected final CharacterView characterView;
     protected final PromptView promptView;
     protected final QuestView questView;
-    protected final List<CommandViewInterface> commandViews;
+    protected final List<CommandEventListener> commandViews;
     protected final GameSerialization gameSerialization;
     protected final GameTime gameTime;
-    protected final List<GameViewInterface> observers = new ArrayList<>();
+    protected final List<GameObserver> observers = new ArrayList<>();
 
-    public void addObservers(List<GameViewInterface> observers) {
+    public void addObservers(List<GameObserver> observers) {
         this.observers.addAll(observers);
     }
 
     public Game(MainView mainView, CharacterView characterView,
-                List<CommandViewInterface> commandViews,
+                List<CommandEventListener> commandViews,
                 GameSerialization gameSerialization, GameTime gameTime) {
         this.mainView = mainView;
         commandController = new CommandController();
@@ -46,9 +46,9 @@ public class Game {
     }
 
     public Game(MainView mainView, CharacterView characterView,
-                List<CommandViewInterface> commandViews,
+                List<CommandEventListener> commandViews,
                 GameSerialization gameSerialization, GameTime gameTime,
-                List<GameViewInterface> observers) {
+                List<GameObserver> observers) {
         this(mainView, characterView, commandViews, gameSerialization, gameTime);
         this.observers.addAll(observers);
     }

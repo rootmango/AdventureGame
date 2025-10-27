@@ -2,8 +2,7 @@ package mvc.controllers;
 
 import mvc.views.*;
 import mvc.views.characterviews.CharacterView;
-import mvc.views.promptviews.PromptView;
-import mvc.views.promptviews.PromptViewInterface;
+import mvc.views.promptviews.PromptEventListener;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -15,9 +14,9 @@ public class PromptController {
     protected final GameSaveView gameSaveView;
     protected final CharacterView characterView;
     protected final PromptYesNoValidation promptYesNoValidation;
-    protected final List<PromptViewInterface> promptViews = new ArrayList<>();
+    protected final List<PromptEventListener> promptViews = new ArrayList<>();
 
-    public void addPromptViews(List<PromptViewInterface> promptViews) {
+    public void addPromptViews(List<PromptEventListener> promptViews) {
         this.promptViews.addAll(promptViews);
     }
 
@@ -30,7 +29,7 @@ public class PromptController {
     }
 
     public PromptController(MainView mainView, GameSaveView gameSaveView, CharacterView characterView,
-                            PromptYesNoValidation promptYesNoValidation, List<PromptViewInterface> promptViews) {
+                            PromptYesNoValidation promptYesNoValidation, List<PromptEventListener> promptViews) {
         this(mainView, gameSaveView, characterView, promptYesNoValidation);
         this.promptViews.addAll(promptViews);
     }
@@ -57,17 +56,17 @@ public class PromptController {
         }*/
 
         if (gameSaveView.savesDirIsEmpty()) {
-            promptViews.forEach(PromptViewInterface::showNoExistingSavesMessage);
+            promptViews.forEach(PromptEventListener::showNoExistingSavesMessage);
             return true;
         } else {
             boolean isValidInput = false;
             String answer = "";
-            promptViews.forEach(PromptViewInterface::askStartNewGame);
+            promptViews.forEach(PromptEventListener::askStartNewGame);
             while (!isValidInput) {
                 answer = mainView.userInputString();
                 isValidInput = promptYesNoValidation.isValidInput(answer);
                 if (!isValidInput) {
-                    promptViews.forEach(PromptViewInterface::askStartNewGameWithHint);
+                    promptViews.forEach(PromptEventListener::askStartNewGameWithHint);
                 }
             }
 
@@ -90,10 +89,10 @@ public class PromptController {
         List<String> availableSavesNames = gameSaveView.showAvailableSavesNames();
         String answer = "";
         while (!availableSavesNames.contains(answer)) {
-            promptViews.forEach(PromptViewInterface::showChooseSaveMessage);
+            promptViews.forEach(PromptEventListener::showChooseSaveMessage);
             answer = mainView.userInputString();
             if (!availableSavesNames.contains(answer)) {
-                promptViews.forEach(PromptViewInterface::showNoSuchSaveMessage);
+                promptViews.forEach(PromptEventListener::showNoSuchSaveMessage);
             }
         }
 
@@ -111,15 +110,15 @@ public class PromptController {
      */
     public String promptNewSaveName() throws IOException {
         String saveName = "";
-        promptViews.forEach(PromptViewInterface::askSaveName);
+        promptViews.forEach(PromptEventListener::askSaveName);
         while (saveName.isEmpty()) {
             String input = mainView.userInputString();
             boolean isValidInput = gameSaveView.isValidNewSaveName(input);
             boolean isTakenSaveName = gameSaveView.saveNameIsTaken(input);
             if (!isValidInput) {
-                promptViews.forEach(PromptViewInterface::showInvalidSaveNameIllegalCharsMessage);
+                promptViews.forEach(PromptEventListener::showInvalidSaveNameIllegalCharsMessage);
             } else if (isTakenSaveName) {
-                promptViews.forEach(PromptViewInterface::showInvalidSaveNameTakenMessage);
+                promptViews.forEach(PromptEventListener::showInvalidSaveNameTakenMessage);
             } else {
                 saveName = input;
             }
@@ -129,7 +128,7 @@ public class PromptController {
     }
 
     public String promptCharacterType() {
-        promptViews.forEach(PromptViewInterface::askCharacterType);
+        promptViews.forEach(PromptEventListener::askCharacterType);
         characterView.showCharacterTypeNames();
         String answer = "";
         boolean isValidCharacterTypeName = false;
@@ -137,7 +136,7 @@ public class PromptController {
             answer = mainView.userInputString();
             isValidCharacterTypeName = characterView.isValidCharacterTypeName(answer);
             if (!isValidCharacterTypeName) {
-                promptViews.forEach(PromptViewInterface::showInvalidCharacterTypeMessage);
+                promptViews.forEach(PromptEventListener::showInvalidCharacterTypeMessage);
             }
         }
         characterView.showOnChosenCharacterType(answer);

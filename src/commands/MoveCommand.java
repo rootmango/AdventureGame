@@ -1,8 +1,9 @@
 package commands;
 
+import gameexceptions.InaccessiblePlaceException;
 import gameexceptions.InsufficientCommandArgsException;
-import mvc.views.commandviews.CommandView;
-import mvc.views.commandviews.CommandViewInterface;
+import gameexceptions.InvalidCommandArgsException;
+import mvc.views.commandviews.CommandEventListener;
 import playercharacter.Direction;
 
 import java.util.List;
@@ -48,31 +49,43 @@ public class MoveCommand extends Command {
 
     public MoveCommand(CommandParameters commandParams) {
         super(commandParams);
+        validateArgs();
     }
 
-    public MoveCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+    public MoveCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
         super(commandParams, commandViews);
+        validateArgs();
+    }
+
+    protected void validateArgs() {
+        if (args.length == 0) {
+            throw new InsufficientCommandArgsException();
+        } else if (!checkUp(args[0]) && !checkLeft(args[0])
+                && !checkRight(args[0]) && !checkDown(args[0])) {
+            throw new InvalidCommandArgsException("Invalid direction! " +
+                    "The valid directions are \"north\", \"south\", \"east\" and \"west\"");
+        }
     }
 
     @Override
     public void execute() {
-        if (args.length == 0) {
-            throw new InsufficientCommandArgsException();
-        } else {
-            synchronized (lock) {
+        synchronized (lock) {
+            try {
                 if (checkUp(args[0])) {
-                    commandViews.forEach(CommandViewInterface::showMoveNorthMessage);
+                    commandEventListeners.forEach(CommandEventListener::showMoveNorthMessage);
                     character.move(map, Direction.UP);
                 } else if (checkLeft(args[0])) {
-                    commandViews.forEach(CommandViewInterface::showMoveWestMessage);
+                    commandEventListeners.forEach(CommandEventListener::showMoveWestMessage);
                     character.move(map, Direction.LEFT);
                 } else if (checkRight(args[0])) {
-                    commandViews.forEach(CommandViewInterface::showMoveEastMessage);
+                    commandEventListeners.forEach(CommandEventListener::showMoveEastMessage);
                     character.move(map, Direction.RIGHT);
                 } else if (checkDown(args[0])) {
-                    commandViews.forEach(CommandViewInterface::showMoveSouthMessage);
+                    commandEventListeners.forEach(CommandEventListener::showMoveSouthMessage);
                     character.move(map, Direction.DOWN);
                 }
+            } catch (InaccessiblePlaceException e) {
+                System.out.println(e.getMessage());
             }
         }
     }

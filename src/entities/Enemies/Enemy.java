@@ -1,15 +1,14 @@
 package entities.Enemies;
 
 import entities.Entity;
-import mvc.views.enemyviews.EnemyView;
-import mvc.views.enemyviews.EnemyViewInterface;
+import mvc.views.enemyviews.EnemyObserver;
 import playercharacter.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Enemy extends Entity {
-    protected final transient List<EnemyViewInterface> observers = new ArrayList<>();
+    protected final transient List<EnemyObserver> observers = new ArrayList<>();
 
     protected int maxHealth;
     protected int currentHealth;
@@ -17,13 +16,13 @@ public abstract class Enemy extends Entity {
     protected boolean isDead = false;
     protected String deathMessage;
 
-    public Enemy(List<EnemyViewInterface> observers) {
+    public Enemy(List<EnemyObserver> observers) {
         this.observers.addAll(observers);
     }
 
     public Enemy() {}
 
-    public void addObservers(List<EnemyViewInterface> observers) {
+    public void addObservers(List<EnemyObserver> observers) {
         this.observers.addAll(observers);
     }
 
@@ -56,24 +55,36 @@ public abstract class Enemy extends Entity {
         return isDead;
     }
 
-    private void characterAttack(PlayerCharacter character) {
-        int characterAttackAmount = character.attackAmount();
+//    private void characterAttack(PlayerCharacter character) {
+//        int characterAttackAmount = character.attackAmount();
+//        currentHealth -= characterAttackAmount;
+//        observers.forEach(observer -> observer.onGotAttacked(this, characterAttackAmount));
+//    }
+
+//    private void characterReceiveAttack(PlayerCharacter character) {
+//        int attackAmount = this.attackAmount();
+//        character.subtractHealth(attackAmount);
+//        observers.forEach(observer -> observer.onAttacked(this, attackAmount));
+//    }
+
+//    public void getAttacked(PlayerCharacter character) {
+//        characterAttack(character);
+//        this.checkAndSetIfDead(character);
+//        if (!isDead) {
+//            characterReceiveAttack(character);
+//        }
+//    }
+
+    public void receiveDamage(PlayerCharacter character, int characterAttackAmount) {
         currentHealth -= characterAttackAmount;
         observers.forEach(observer -> observer.onGotAttacked(this, characterAttackAmount));
+        this.checkAndSetIfDead(character);
     }
 
-    private void characterReceiveAttack(PlayerCharacter character) {
+    public void attackCharacter(PlayerCharacter character) {
         int attackAmount = this.attackAmount();
         character.subtractHealth(attackAmount);
         observers.forEach(observer -> observer.onAttacked(this, attackAmount));
-    }
-
-    public void getAttacked(PlayerCharacter character) {
-        characterAttack(character);
-        this.checkAndSetIfDead(character);
-        if (!isDead) {
-            characterReceiveAttack(character);
-        }
     }
 
 }

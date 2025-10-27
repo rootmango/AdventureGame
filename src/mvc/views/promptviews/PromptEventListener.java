@@ -1,6 +1,6 @@
 package mvc.views.promptviews;
 
-public interface PromptViewInterface {
+public interface PromptEventListener {
     void showPromptChar();
 
     void askStartNewGame();

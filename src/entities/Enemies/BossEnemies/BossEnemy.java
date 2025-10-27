@@ -2,7 +2,7 @@ package entities.Enemies.BossEnemies;
 
 import entities.Enemies.Enemy;
 import gamerandom.GameRNG;
-import mvc.views.enemyviews.EnemyViewInterface;
+import mvc.views.enemyviews.EnemyObserver;
 import playercharacter.PlayerCharacter;
 
 import java.util.List;
@@ -11,7 +11,7 @@ public abstract class BossEnemy extends Enemy {
     protected int minAttack;
     protected int maxAttack;
 
-    public BossEnemy(List<EnemyViewInterface> observers) {
+    public BossEnemy(List<EnemyObserver> observers) {
         super(observers);
     }
 

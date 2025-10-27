@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class CharacterView extends MainView implements CharacterViewInterface {
+public class CharacterView extends MainView implements CharacterObserver {
     protected final GameMapView mapView;
 
     public CharacterView(GameMapView mapView) {

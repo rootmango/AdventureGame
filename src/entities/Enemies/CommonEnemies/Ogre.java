@@ -1,6 +1,6 @@
 package entities.Enemies.CommonEnemies;
 
-import mvc.views.enemyviews.EnemyViewInterface;
+import mvc.views.enemyviews.EnemyObserver;
 
 import java.util.List;
 
@@ -14,7 +14,7 @@ public class Ogre extends CommonEnemy {
         deathMessage = "Ogre has died";
     }
 
-    public Ogre(List<EnemyViewInterface> observers) {
+    public Ogre(List<EnemyObserver> observers) {
         this();
         this.observers.addAll(observers);
     }

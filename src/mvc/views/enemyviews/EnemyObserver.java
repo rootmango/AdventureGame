@@ -2,7 +2,7 @@ package mvc.views.enemyviews;
 
 import entities.Enemies.Enemy;
 
-public interface EnemyViewInterface {
+public interface EnemyObserver {
     void onDied(Enemy enemy);
 
     void onGotAttacked(Enemy enemy, int attackAmount);

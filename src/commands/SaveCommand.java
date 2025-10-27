@@ -7,7 +7,7 @@ import maps.GameMap;
 import mvc.views.characterviews.CharacterView;
 import mvc.views.GameMapView;
 import mvc.views.QuestView;
-import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.commandviews.CommandEventListener;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
@@ -20,7 +20,7 @@ public class SaveCommand extends Command {
         super(commandParams);
     }
 
-    public SaveCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+    public SaveCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
         super(commandParams, commandViews);
     }
 
@@ -55,7 +55,7 @@ public class SaveCommand extends Command {
      */
     public SaveCommand(PlayerCharacter character, GameMap map, long startTime, String saveName,
                        GameSerialization gameSerialization, GameTime gameTime,
-                       List<CommandViewInterface> commandViews) {
+                       List<CommandEventListener> commandViews) {
         super(new CommandParameters(
                 new QuestView(),
                 new CharacterView(new GameMapView()),
@@ -76,9 +76,9 @@ public class SaveCommand extends Command {
         synchronized (lock) {
             try {
                 gameSerialization.createOrOverwriteSave(character, map, startTime, saveName, gameTime);
-                commandViews.forEach(view -> view.showSuccessfulSaveMessage(saveName));
+                commandEventListeners.forEach(view -> view.showSuccessfulSaveMessage(saveName));
             } catch (IOException e) {
-                commandViews.forEach(view -> view.showSaveErrorMessage(e));
+                commandEventListeners.forEach(view -> view.showSaveErrorMessage(e));
             }
         }
     }

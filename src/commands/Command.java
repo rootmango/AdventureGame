@@ -6,8 +6,7 @@ import gameio.GameSerialization;
 import maps.GameMap;
 import mvc.views.*;
 import mvc.views.characterviews.CharacterView;
-import mvc.views.commandviews.CommandView;
-import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.commandviews.CommandEventListener;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
@@ -27,7 +26,7 @@ public abstract class Command {
     protected final GameSerialization gameSerialization;
     protected final GameTime gameTime;
     protected final Object lock;
-    protected final List<CommandViewInterface> commandViews = new ArrayList<>();
+    protected final List<CommandEventListener> commandEventListeners = new ArrayList<>();
     protected final String[] args;
 
     public abstract void execute();
@@ -47,13 +46,13 @@ public abstract class Command {
         this.args = commandParams.args();
     }
 
-    public Command(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+    public Command(CommandParameters commandParams, List<CommandEventListener> commandEventListeners) {
         this(commandParams);
-        this.commandViews.addAll(commandViews);
+        this.commandEventListeners.addAll(commandEventListeners);
     }
 
-    public void addCommandViews(List<CommandViewInterface> commandViews) {
-        this.commandViews.addAll(commandViews);
+    public void addCommandEventListeners(List<CommandEventListener> commandViews) {
+        this.commandEventListeners.addAll(commandViews);
     }
 
     protected final String getSubjectNameFromCommandArgs(String[] commandArgs) {

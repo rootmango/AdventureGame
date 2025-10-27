@@ -6,7 +6,7 @@ import gameio.GameSerialization;
 import maps.GameMap;
 import mvc.views.*;
 import mvc.views.characterviews.CharacterView;
-import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.commandviews.CommandEventListener;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
@@ -18,7 +18,7 @@ public class MapCommand extends Command {
         super(commandParams);
     }
 
-    public MapCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+    public MapCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
         super(commandParams, commandViews);
     }
 
@@ -50,7 +50,7 @@ public class MapCommand extends Command {
      * the rest of the fields are assigned to newly-initialized objects (since every field in
      * {@code Command} is {@code final}).
      */
-    public MapCommand(PlayerCharacter character, GameMap map, List<CommandViewInterface> commandViews) {
+    public MapCommand(PlayerCharacter character, GameMap map, List<CommandEventListener> commandViews) {
         super(new CommandParameters(
                 new QuestView(),
                 new CharacterView(new GameMapView()),

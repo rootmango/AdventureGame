@@ -1,5 +1,6 @@
 package playercharacter;
 
+import entities.Enemies.Enemy;
 import entities.ItemContainers.ItemContainer;
 import gameexceptions.*;
 import gamerandom.GameRNG;
@@ -8,16 +9,16 @@ import items.Equipables.Equipable;
 import items.Item;
 import maps.GameMap;
 import maps.Place;
-import mvc.views.characterviews.CharacterViewInterface;
-import mvc.views.itemviews.ItemViewInterface;
-import mvc.views.placeviews.PlaceViewInterface;
+import mvc.views.characterviews.CharacterObserver;
+import mvc.views.itemviews.ItemObserver;
+import mvc.views.placeviews.PlaceObserver;
 
 import java.io.Serializable;
 import java.util.*;
 
 public class PlayerCharacter implements Serializable {
-    private final transient List<CharacterViewInterface> characterObservers = new ArrayList<>();
-    private final transient List<PlaceViewInterface> placeObservers = new ArrayList<>();
+    private final transient List<CharacterObserver> characterObservers = new ArrayList<>();
+    private final transient List<PlaceObserver> placeObservers = new ArrayList<>();
 
     private int maxHealth;
     private int maxMana;
@@ -86,15 +87,15 @@ public class PlayerCharacter implements Serializable {
         return currentBossEnemyName;
     }
 
-    public void addCharacterObservers(List<CharacterViewInterface> characterObservers) {
+    public void addCharacterObservers(List<CharacterObserver> characterObservers) {
         this.characterObservers.addAll(characterObservers);
     }
 
-    public void addPlaceObservers(List<PlaceViewInterface> observers) {
+    public void addPlaceObservers(List<PlaceObserver> observers) {
         this.placeObservers.addAll(observers);
     }
 
-    public void addItemObservers(List<ItemViewInterface> observers) {
+    public void addItemObservers(List<ItemObserver> observers) {
         itemList.forEach(item -> item.addObservers(observers));
         equippedItem.forEach(item -> item.addObservers(observers));
     }
@@ -150,14 +151,14 @@ public class PlayerCharacter implements Serializable {
     }
 
     public PlayerCharacter(String characterTypeName,
-                           List<CharacterViewInterface> characterObservers) {
+                           List<CharacterObserver> characterObservers) {
         this(characterTypeName);
         this.characterObservers.addAll(characterObservers);
     }
 
     public PlayerCharacter(String characterTypeName,
-                           List<CharacterViewInterface> characterObservers,
-                           List<PlaceViewInterface> placeObservers) {
+                           List<CharacterObserver> characterObservers,
+                           List<PlaceObserver> placeObservers) {
         this(characterTypeName, characterObservers);
         this.placeObservers.addAll(placeObservers);
     }
@@ -226,7 +227,7 @@ public class PlayerCharacter implements Serializable {
             Place nextPlace = map.at(nextPlaceX, nextPlaceY);
 
             if (nextPlace.isBorder() || nextPlace.isLocked()) {
-                placeObservers.forEach(observer -> observer.showInaccessibleMessage(nextPlace));
+                throw new InaccessiblePlaceException(nextPlace);
             } else {
                 if (nextPlace.isFortress()) {
                     if (nextPlace.containsBossEnemy()) {
@@ -402,5 +403,10 @@ public class PlayerCharacter implements Serializable {
         for (var item: itemList) {
             item.setOwner(this);
         }
+    }
+
+    public void attack(Enemy enemy) {
+        int attackAmount = this.attackAmount();
+        enemy.receiveDamage(this, attackAmount);
     }
 }

@@ -1,5 +1,5 @@
 package mvc.views.itemviews;
 
-public interface ItemViewInterface {
+public interface ItemObserver {
     void onAnotherItemAlreadyEquipped();
 }

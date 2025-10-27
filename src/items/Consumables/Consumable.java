@@ -1,8 +1,7 @@
 package items.Consumables;
 
 import items.Item;
-import mvc.views.itemviews.ItemView;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.itemviews.ItemObserver;
 
 import java.util.List;
 
@@ -10,7 +9,7 @@ public abstract class Consumable extends Item {
     protected int currentHealthIncreaseAmount;
     protected int currentManaIncreaseAmount;
 
-    public Consumable(List<ItemViewInterface> observers) {
+    public Consumable(List<ItemObserver> observers) {
         super(observers);
     }
 

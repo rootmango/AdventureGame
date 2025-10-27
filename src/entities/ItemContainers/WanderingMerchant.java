@@ -3,7 +3,7 @@ package entities.ItemContainers;
 import gamerandom.GameRNG;
 import items.Consumables.HealthPotion;
 import items.Consumables.ManaPotion;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.itemviews.ItemObserver;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class WanderingMerchant extends ItemContainer {
         messageWhenEmpty = "Wandering Merchant has no more items!";
     }
 
-    public WanderingMerchant(List<ItemViewInterface> observers) {
+    public WanderingMerchant(List<ItemObserver> observers) {
         this();
         this.observers.addAll(observers);
     }

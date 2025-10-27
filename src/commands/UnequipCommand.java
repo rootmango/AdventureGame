@@ -1,8 +1,7 @@
 package commands;
 
 import gameexceptions.NoEquippedItemException;
-import mvc.views.commandviews.CommandView;
-import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.commandviews.CommandEventListener;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ public class UnequipCommand extends Command {
         super(commandParams);
     }
 
-    public UnequipCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+    public UnequipCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
         super(commandParams, commandViews);
     }
 

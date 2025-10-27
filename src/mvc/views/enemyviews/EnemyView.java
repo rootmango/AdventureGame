@@ -3,7 +3,7 @@ package mvc.views.enemyviews;
 import entities.Enemies.Enemy;
 import mvc.views.MainView;
 
-public class EnemyView extends MainView implements EnemyViewInterface {
+public class EnemyView extends MainView implements EnemyObserver {
     public void onDied(Enemy enemy) {
         outputln(enemy.getDeathMessage());
     }

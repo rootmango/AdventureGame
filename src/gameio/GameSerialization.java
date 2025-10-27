@@ -11,10 +11,10 @@ import items.Equipables.Equipable;
 import items.Item;
 import maps.GameMap;
 import maps.GameMapDeserializer;
-import mvc.views.characterviews.CharacterViewInterface;
-import mvc.views.enemyviews.EnemyViewInterface;
-import mvc.views.itemviews.ItemViewInterface;
-import mvc.views.placeviews.PlaceViewInterface;
+import mvc.views.characterviews.CharacterObserver;
+import mvc.views.enemyviews.EnemyObserver;
+import mvc.views.itemviews.ItemObserver;
+import mvc.views.placeviews.PlaceObserver;
 import playercharacter.PlayerCharacter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -28,10 +28,10 @@ import java.util.stream.Stream;
 
 public class GameSerialization {
     public DeserializedBundle readFromSave(String saveName,
-                                           List<CharacterViewInterface> characterObservers,
-                                           List<PlaceViewInterface> placeObservers,
-                                           List<ItemViewInterface> itemObservers,
-                                           List<EnemyViewInterface> enemyObservers) throws IOException {
+                                           List<CharacterObserver> characterObservers,
+                                           List<PlaceObserver> placeObservers,
+                                           List<ItemObserver> itemObservers,
+                                           List<EnemyObserver> enemyObservers) throws IOException {
         return new DeserializedBundle(
                 readPlayerCharacterFromSave(saveName, characterObservers, placeObservers, itemObservers),
                 readGameMapFromSave(saveName, itemObservers, enemyObservers),
@@ -40,8 +40,8 @@ public class GameSerialization {
     }
 
     private GameMap readGameMapFromSave(String saveName,
-                                        List<ItemViewInterface> itemObservers,
-                                        List<EnemyViewInterface> enemyObservers)
+                                        List<ItemObserver> itemObservers,
+                                        List<EnemyObserver> enemyObservers)
             throws IOException {
 
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;
@@ -59,9 +59,9 @@ public class GameSerialization {
     }
 
     private PlayerCharacter readPlayerCharacterFromSave(String saveName,
-                                                        List<CharacterViewInterface> characterObservers,
-                                                        List<PlaceViewInterface> placeObservers,
-                                                        List<ItemViewInterface> itemObservers)
+                                                        List<CharacterObserver> characterObservers,
+                                                        List<PlaceObserver> placeObservers,
+                                                        List<ItemObserver> itemObservers)
             throws IOException {
 
         String savePath = GamePaths.SAVES_DIRECTORY + "/" + saveName;

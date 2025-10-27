@@ -2,8 +2,6 @@ package mvc.views.placeviews;
 
 import maps.Place;
 
-public interface PlaceViewInterface {
-    void showInaccessibleMessage(Place place);
-
+public interface PlaceObserver {
     void showEntryMessage(Place place);
 }

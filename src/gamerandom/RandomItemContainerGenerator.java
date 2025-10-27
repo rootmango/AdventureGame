@@ -3,15 +3,15 @@ package gamerandom;
 import entities.ItemContainers.Chest;
 import entities.ItemContainers.ItemContainer;
 import entities.ItemContainers.WanderingMerchant;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.itemviews.ItemObserver;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RandomItemContainerGenerator implements RandomEntityGenerator {
-    protected final List<ItemViewInterface> observers = new ArrayList<>();
+    protected final List<ItemObserver> observers = new ArrayList<>();
 
-    public RandomItemContainerGenerator(List<ItemViewInterface> observers) {
+    public RandomItemContainerGenerator(List<ItemObserver> observers) {
         this.observers.addAll(observers);
     }
 
@@ -26,7 +26,6 @@ public class RandomItemContainerGenerator implements RandomEntityGenerator {
         } else {
             throw new RuntimeException("Unexpected error");
         }
-        itemContainer.fill();
         return itemContainer;
     }
 }

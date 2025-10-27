@@ -6,11 +6,7 @@ import items.Item;
 import maps.GameMap;
 import playercharacter.PlayerCharacter;
 
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-public interface CharacterViewInterface {
+public interface CharacterObserver {
     void showInventory(PlayerCharacter character);
 
     void showCharacterTypeNames();

@@ -5,8 +5,8 @@ import gameexceptions.UnrecognizedCharException;
 import gameio.MapIO;
 import gamerandom.RandomCommonEnemyGenerator;
 import gamerandom.RandomItemContainerGenerator;
-import mvc.views.enemyviews.EnemyViewInterface;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.enemyviews.EnemyObserver;
+import mvc.views.itemviews.ItemObserver;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -14,13 +14,15 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static maps.Place.PLACES;
+
 /**
  * A wrapper class for a 2d array that represents the 2d game map.
  */
 public class GameMap implements Serializable {
     private final Place[][] placesArray;
 
-    public GameMap(List<EnemyViewInterface> enemyObservers,
+    public GameMap(List<EnemyObserver> enemyObservers,
                    RandomCommonEnemyGenerator randomCommonEnemyGenerator,
                    RandomItemContainerGenerator randomItemContainerGenerator) throws IOException {
         placesArray = fillMap(enemyObservers, randomCommonEnemyGenerator, randomItemContainerGenerator);
@@ -57,7 +59,7 @@ public class GameMap implements Serializable {
         return fortress;
     }
 
-    public Place[][] fillMap(List<EnemyViewInterface> enemyObservers,
+    public Place[][] fillMap(List<EnemyObserver> enemyObservers,
                              RandomCommonEnemyGenerator randomCommonEnemyGenerator,
                              RandomItemContainerGenerator randomItemContainerGenerator) throws IOException {
         MapIO mapIO = new MapIO();
@@ -66,15 +68,20 @@ public class GameMap implements Serializable {
         for (int i = 0; i < lines.size(); i++) {
             for (int j = 0; j < lines.get(i).length(); j++) {
                 char c = lines.get(i).charAt(j);
-                array[i][j] = new Place(j, i, c, enemyObservers,
-                        randomCommonEnemyGenerator, randomItemContainerGenerator);
+                array[i][j] = new Place(j, i, c);
+                if (PLACES.containsKey(c)) {
+                    array[i][j].seedWithCommonEnemies(randomCommonEnemyGenerator);
+                    array[i][j].seedWithItemContainers(randomItemContainerGenerator);
+                } else if (c == 'F') {
+                    array[i][j].seedWithGoblinKing(enemyObservers);
+                }
             }
         }
 
         return array;
     }
 
-    public void addEnemyObservers(List<EnemyViewInterface> observers) {
+    public void addEnemyObservers(List<EnemyObserver> observers) {
         for (int i = 0; i < placesArray.length; i++) {
             for (int j = 0; j < placesArray[0].length; j++) {
                 Place place = placesArray[i][j];
@@ -83,7 +90,7 @@ public class GameMap implements Serializable {
         }
     }
 
-    public void addItemObservers(List<ItemViewInterface> observers) {
+    public void addItemObservers(List<ItemObserver> observers) {
         for (int i = 0; i < placesArray.length; i++) {
             for (int j = 0; j < placesArray[0].length; j++) {
                 Place place = placesArray[i][j];

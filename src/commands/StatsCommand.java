@@ -1,7 +1,6 @@
 package commands;
 
-import mvc.views.commandviews.CommandView;
-import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.commandviews.CommandEventListener;
 
 import java.util.List;
 
@@ -10,7 +9,7 @@ public class StatsCommand extends Command {
         super(commandParams);
     }
 
-    public StatsCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+    public StatsCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
         super(commandParams, commandViews);
     }
 

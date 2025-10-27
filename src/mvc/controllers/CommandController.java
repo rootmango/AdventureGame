@@ -8,18 +8,17 @@ import game.GameTime;
 import game.MutableBoolean;
 import gameexceptions.EmptyCommandNameException;
 import gameexceptions.InsufficientCommandArgsException;
+import gameexceptions.InvalidCommandArgsException;
 import gameexceptions.InvalidCommandNameException;
 import gameio.GameSerialization;
 import maps.GameMap;
 import mvc.views.*;
 import mvc.views.characterviews.CharacterView;
-import mvc.views.commandviews.CommandView;
-import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.commandviews.CommandEventListener;
 import mvc.views.promptviews.PromptView;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -41,7 +40,7 @@ public class CommandController {
                                    long startTime, MutableBoolean quit, PromptView promptView,
                                    QuestView questView, CharacterView characterView,
                                    GameSerialization gameSerialization,
-                                   List<CommandViewInterface> commandViews, GameTime gameTime) {
+                                   List<CommandEventListener> commandViews, GameTime gameTime) {
 
         PlayerCharacter character = gameLoopCoreParams.character();
         GameMap map = gameLoopCoreParams.map();
@@ -69,7 +68,9 @@ public class CommandController {
             } catch (EmptyCommandNameException e) {
                 mainView.outputln("Command name cannot be empty!");
             } catch (InsufficientCommandArgsException e) {
-                commandViews.forEach(CommandViewInterface::showHelpCommands);
+                commandViews.forEach(CommandEventListener::showHelpCommands);
+            } catch (InvalidCommandArgsException e) {
+                mainView.outputln(e.getMessage());
             }
         }
 

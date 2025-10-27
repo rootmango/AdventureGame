@@ -3,7 +3,7 @@ package entities.ItemContainers;
 import gamerandom.GameRNG;
 import items.Equipables.IronDagger;
 import items.Equipables.Staff;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.itemviews.ItemObserver;
 
 import java.util.List;
 
@@ -13,7 +13,7 @@ public class Chest extends ItemContainer {
         messageWhenEmpty = "Chest is empty!";
     }
 
-    public Chest(List<ItemViewInterface> observers) {
+    public Chest(List<ItemObserver> observers) {
         this();
         this.observers.addAll(observers);
     }

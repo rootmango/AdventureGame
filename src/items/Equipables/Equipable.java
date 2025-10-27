@@ -2,8 +2,7 @@ package items.Equipables;
 
 import gameexceptions.AnotherItemAlreadyEquippedException;
 import items.Item;
-import mvc.views.itemviews.ItemView;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.itemviews.ItemObserver;
 
 import java.util.List;
 
@@ -11,7 +10,7 @@ public abstract class Equipable extends Item {
     protected int attackAmount;
     protected int manaConsumptionAmount;
 
-    public Equipable(List<ItemViewInterface> observers) {
+    public Equipable(List<ItemObserver> observers) {
         super(observers);
     }
 
@@ -31,7 +30,7 @@ public abstract class Equipable extends Item {
             owner.setEquippedItem(this);
             owner.removeFromItemList(this);
         } catch (AnotherItemAlreadyEquippedException e) {
-            observers.forEach(ItemViewInterface::onAnotherItemAlreadyEquipped);
+            observers.forEach(ItemObserver::onAnotherItemAlreadyEquipped);
         }
     }
 }

@@ -1,6 +1,6 @@
 package mvc.views.commandviews;
 
-public interface CommandViewInterface {
+public interface CommandEventListener {
     void showMoveNorthMessage();
 
     void showMoveWestMessage();

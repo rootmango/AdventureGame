@@ -7,7 +7,7 @@ import playercharacter.PlayerCharacter;
 
 import java.io.IOException;
 
-public class GameView extends MainView implements GameViewInterface {
+public class GameView extends MainView implements GameObserver {
     protected final GameTime gameTime = new GameTime();
 
     public void onQuit(PlayerCharacter character, CharacterView characterView) {

@@ -10,5 +10,4 @@ public class GameIOException extends IOException {
     public GameIOException(String message) {
         super(message);
     }
-    public GameIOException() {}
 }

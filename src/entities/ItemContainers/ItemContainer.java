@@ -2,23 +2,23 @@ package entities.ItemContainers;
 
 import entities.Entity;
 import items.Item;
-import mvc.views.itemviews.ItemViewInterface;
+import mvc.views.itemviews.ItemObserver;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 public abstract class ItemContainer extends Entity {
-    protected final transient List<ItemViewInterface> observers = new ArrayList<>();
+    protected final transient List<ItemObserver> observers = new ArrayList<>();
 
-    public ItemContainer(List<ItemViewInterface> observers) {
+    public ItemContainer(List<ItemObserver> observers) {
         this.observers.addAll(observers);
         list.forEach(item -> item.addObservers(observers));
     }
 
     public ItemContainer() {}
 
-    public void addObservers(List<ItemViewInterface> observers) {
+    public void addObservers(List<ItemObserver> observers) {
         this.observers.addAll(observers);
         list.forEach(item -> item.addObservers(observers));
     }

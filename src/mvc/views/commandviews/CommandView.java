@@ -2,7 +2,7 @@ package mvc.views.commandviews;
 
 import mvc.views.MainView;
 
-public class CommandView extends MainView implements CommandViewInterface {
+public class CommandView extends MainView implements CommandEventListener {
     public void showMoveNorthMessage() {
         outputln("Moving north");
     }

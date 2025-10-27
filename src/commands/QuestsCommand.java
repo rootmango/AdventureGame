@@ -7,7 +7,7 @@ import maps.GameMap;
 import maps.Place;
 import mvc.views.*;
 import mvc.views.characterviews.CharacterView;
-import mvc.views.commandviews.CommandViewInterface;
+import mvc.views.commandviews.CommandEventListener;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
@@ -18,7 +18,7 @@ public class QuestsCommand extends Command {
         super(commandParams);
     }
 
-    public QuestsCommand(CommandParameters commandParams, List<CommandViewInterface> commandViews) {
+    public QuestsCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
         super(commandParams, commandViews);
     }
 
@@ -50,7 +50,7 @@ public class QuestsCommand extends Command {
      * the rest of the fields are assigned to newly-initialized objects (since every field in
      * {@code Command} is {@code final}).
      */
-    public QuestsCommand(List<Quest> questList, List<CommandViewInterface> commandViews) {
+    public QuestsCommand(List<Quest> questList, List<CommandEventListener> commandViews) {
         super(new CommandParameters(
                 new QuestView(),
                 new CharacterView(new GameMapView()),

@@ -10,7 +10,7 @@ import gamerandom.GameRNG;
 import game.*;
 import gamerandom.RandomCommonEnemyGenerator;
 import gamerandom.RandomItemContainerGenerator;
-import mvc.views.enemyviews.EnemyViewInterface;
+import mvc.views.enemyviews.EnemyObserver;
 
 import java.io.Serializable;
 import java.util.*;
@@ -25,10 +25,10 @@ public class Place implements Serializable {
     private final List<Enemy> enemies = new ArrayList<>();
     private final List<ItemContainer> itemContainers = new ArrayList<>();
     private boolean isLocked = false;
-    private String inaccessibleMessage = "";
+    private transient String inaccessibleMessage = "";
     private boolean isFortress = false;
 
-    private static final HashMap<Character, NameAndDescription> PLACES = new HashMap<>(Map.ofEntries(
+    public static final HashMap<Character, NameAndDescription> PLACES = new HashMap<>(Map.ofEntries(
             Map.entry('D', new NameAndDescription("Dark Forest", "Entering a dark forest...")),
             Map.entry('I', new NameAndDescription("Misty Glade", "Entering a misty glade...")),
             Map.entry('W', new NameAndDescription("Winding Riverbank",
@@ -93,9 +93,7 @@ public class Place implements Serializable {
         return isBorder;
     }
 
-    public Place(int xCoordinate, int yCoordinate, char c, List<EnemyViewInterface> enemyObservers,
-                 RandomCommonEnemyGenerator randomCommonEnemyGenerator,
-                 RandomItemContainerGenerator randomItemContainerGenerator)
+    public Place(int xCoordinate, int yCoordinate, char c)
             throws UnrecognizedCharException {
         this.xCoordinate = xCoordinate;
         this.yCoordinate = yCoordinate;
@@ -103,7 +101,6 @@ public class Place implements Serializable {
         if (PLACES.containsKey(c)) {
             name = PLACES.get(c).name();
             description = PLACES.get(c).description();
-            seed(randomCommonEnemyGenerator, randomItemContainerGenerator);
         } else if (c == 'E') {
             name = "Entry";
             description = "entry placeholder";
@@ -113,7 +110,6 @@ public class Place implements Serializable {
             isFortress = true;
             isLocked = true;
             inaccessibleMessage = "Fortress is currently locked! You can't enter it right now!";
-            seedWithGoblinKing(enemyObservers);
         } else if (c == '0') {
             name = "Border";
             description = "border placeholder";
@@ -140,10 +136,9 @@ public class Place implements Serializable {
     }
 
     /**
-     * Fills the current place with a random number of distinct item containers and enemies.
+     * Fills the current place with a random number of distinct common enemies.
      */
-    private void seed(RandomCommonEnemyGenerator randomCommonEnemyGenerator,
-                      RandomItemContainerGenerator randomItemContainerGenerator) {
+    public void seedWithCommonEnemies(RandomCommonEnemyGenerator randomCommonEnemyGenerator) {
         // For simplicity of the game interface's sake, each place may not contain more than one type
         // of enemy or item container.
         //
@@ -165,11 +160,29 @@ public class Place implements Serializable {
                 enemiesIterator++;
             }
         } while (enemiesIterator < enemiesCount);
+    }
+
+    /**
+     * Fills the current place with a random number of distinct item containers.
+     */
+    public void seedWithItemContainers(RandomItemContainerGenerator randomItemContainerGenerator) {
+        // For simplicity of the game interface's sake, each place may not contain more than one type
+        // of enemy or item container.
+        //
+        // Since this is a text game, the player typing "attack goblin" when there are 3 goblins will only
+        // result in confusion, since the player will not know which of the 3 is currently attacked.
+        //
+        // A possible solution is attaching an id to each entity, however typing an id (even if it's a
+        // single-digit id for the number-in-row) every time could quickly become annoying to the player.
+        //
+        // Nevertheless, I have chosen to keep "enemies" and "itemContainers" as lists and not sets for
+        // flexibility should any of the above solutions be implemented.
 
         int itemContainersCount = GameRNG.randomInRange(1, 1);
         int containersIterator = 0;
         do {
             ItemContainer itemContainer = randomItemContainerGenerator.generate();
+            itemContainer.fill();
             if (!itemContainers.contains(itemContainer)) {
                 itemContainers.add(itemContainer);
                 containersIterator++;
@@ -177,7 +190,7 @@ public class Place implements Serializable {
         } while (containersIterator < itemContainersCount);
     }
 
-    private void seedWithGoblinKing(List<EnemyViewInterface> enemyObservers) {
+    public void seedWithGoblinKing(List<EnemyObserver> enemyObservers) {
         enemies.add(new GoblinKing(enemyObservers));
     }
 
