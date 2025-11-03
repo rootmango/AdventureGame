@@ -1,4 +1,4 @@
-package game;
+package mvc.controllers.game;
 
 public class MutableBoolean {
     private boolean value;

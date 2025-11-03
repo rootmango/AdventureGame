@@ -1,10 +1,10 @@
-package game;
+package mvc.controllers.game;
 
 import mvc.views.MainView;
 
 import java.util.concurrent.TimeUnit;
 
-public class GameTime {
+public class GameTimeUtils {
     public long elapsedTimeFrom(long startTime) {
         return System.currentTimeMillis() - startTime;
     }

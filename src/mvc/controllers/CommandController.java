@@ -3,9 +3,8 @@ package mvc.controllers;
 import commands.Command;
 import commands.CommandFactory;
 import commands.CommandParameters;
-import game.GameLoopCoreParams;
-import game.GameTime;
-import game.MutableBoolean;
+import mvc.controllers.game.GameTimeUtils;
+import mvc.controllers.game.MutableBoolean;
 import gameexceptions.EmptyCommandNameException;
 import gameexceptions.InsufficientCommandArgsException;
 import gameexceptions.InvalidCommandArgsException;
@@ -14,7 +13,7 @@ import gameio.GameSerialization;
 import maps.GameMap;
 import mvc.views.*;
 import mvc.views.characterviews.CharacterView;
-import mvc.views.commandviews.CommandEventListener;
+import mvc.views.commandviews.CommandView;
 import mvc.views.promptviews.PromptView;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
@@ -35,21 +34,29 @@ public class CommandController {
         return Arrays.copyOfRange(inputArgs, 1, inputArgs.length);
     }
 
-    public void handleCommandInput(MainView mainView, Object lock,
-                                   GameLoopCoreParams gameLoopCoreParams,
-                                   long startTime, MutableBoolean quit, PromptView promptView,
-                                   QuestView questView, CharacterView characterView,
-                                   GameSerialization gameSerialization,
-                                   List<CommandEventListener> commandViews, GameTime gameTime) {
+    public void handleCommandInput(Object lock,
+                                   CommandGameStateBundle commandGameStateBundle,
+                                   CommandViewsBundle commandViewsBundle,
+                                   CommandTimeBundle commandTimeBundle,
+                                   GameSerialization gameSerialization) {
 
-        PlayerCharacter character = gameLoopCoreParams.character();
-        GameMap map = gameLoopCoreParams.map();
-        List<Quest> questList = gameLoopCoreParams.questList();
-        String saveName = gameLoopCoreParams.saveName();
+        PlayerCharacter character = commandGameStateBundle.character();
+        GameMap map = commandGameStateBundle.map();
+        List<Quest> questList = commandGameStateBundle.questList();
+        String saveName = commandGameStateBundle.saveName();
+        MutableBoolean quit = commandGameStateBundle.quit();
+
+        CommandView commandView = commandViewsBundle.commandView();
+        PromptView promptView = commandViewsBundle.promptView();
+        QuestView questView = commandViewsBundle.questView();
+        CharacterView characterView = commandViewsBundle.characterView();
+
+        long startTime = commandTimeBundle.startTime();
+        GameTimeUtils gameTimeUtils = commandTimeBundle.gameTimeUtils();
 
         promptView.showPromptChar();
 
-        String[] inputArgs = mainView.userInputString().split(" ");
+        String[] inputArgs = commandView.userInputString().split(" ");
 
         if (inputArgs.length > 0) {
             String commandName = getCommandFromInputArgs(inputArgs);
@@ -57,20 +64,21 @@ public class CommandController {
 
             var commandParams = new CommandParameters(questView, characterView,
                     character, map, questList, startTime, saveName,
-                    quit, gameSerialization, gameTime, lock, args);
+                    quit, gameSerialization, gameTimeUtils, lock, args);
 
             try {
                 var commandFactory = new CommandFactory();
-                Command command = commandFactory.createCommand(commandName, commandParams, commandViews);
+                Command command = commandFactory
+                        .createCommand(commandName, commandParams, commandView);
                 command.execute();
             } catch (InvalidCommandNameException e) {
-                mainView.outputln("Invalid command name!");
+                commandView.outputln("Invalid command name!");
             } catch (EmptyCommandNameException e) {
-                mainView.outputln("Command name cannot be empty!");
+                commandView.outputln("Command name cannot be empty!");
             } catch (InsufficientCommandArgsException e) {
-                commandViews.forEach(CommandEventListener::showHelpCommands);
+                commandView.showHelpCommands();
             } catch (InvalidCommandArgsException e) {
-                mainView.outputln(e.getMessage());
+                commandView.outputln(e.getMessage());
             }
         }
 

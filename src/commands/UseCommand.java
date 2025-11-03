@@ -7,13 +7,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 public class UseCommand extends Command {
-    public UseCommand(CommandParameters commandParams) {
-        super(commandParams);
-        validateArgs();
-    }
-
-    public UseCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
-        super(commandParams, commandViews);
+    public UseCommand(CommandParameters commandParams, CommandEventListener commandEventListener) {
+        super(commandParams, commandEventListener);
         validateArgs();
     }
 

@@ -1,17 +1,17 @@
 package mvc.views.gameviews;
 
-import game.GameTime;
+import mvc.controllers.game.GameTimeUtils;
 import mvc.views.MainView;
 import mvc.views.characterviews.CharacterView;
 import playercharacter.PlayerCharacter;
 
 import java.io.IOException;
 
-public class GameView extends MainView implements GameObserver {
-    protected final GameTime gameTime = new GameTime();
+public class GameView extends MainView implements GameEventListener {
+    protected final GameTimeUtils gameTimeUtils = new GameTimeUtils();
 
     public void onQuit(PlayerCharacter character, CharacterView characterView) {
-        outputln("Quitting game...");
+        outputln("Quitting mvc.controllers.game...");
         outputln("\nCharacter stats:");
         characterView.showCharacterStats(character);
         outputln();
@@ -19,16 +19,16 @@ public class GameView extends MainView implements GameObserver {
 
     public void onWon(PlayerCharacter character, CharacterView characterView,
                       long startTime) {
-        outputln("You have won the game!");
+        outputln("You have won the mvc.controllers.game!");
         outputln("\nCharacter stats:");
         characterView.showCharacterStats(character);
         outputln();
-        gameTime.printElapsedTime(startTime, this);
+        gameTimeUtils.printElapsedTime(startTime, this);
     }
 
     public void onDied(long startTime) {
         outputln("You have died!");
-        gameTime.printElapsedTime(startTime, this);
+        gameTimeUtils.printElapsedTime(startTime, this);
     }
 
     public void onErrorDeletingSave(Exception e) {

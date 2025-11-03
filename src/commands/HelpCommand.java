@@ -5,16 +5,12 @@ import mvc.views.commandviews.CommandEventListener;
 import java.util.List;
 
 public class HelpCommand extends Command{
-    public HelpCommand(CommandParameters commandParams) {
-        super(commandParams);
-    }
-
-    public HelpCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
-        super(commandParams, commandViews);
+    public HelpCommand(CommandParameters commandParams, CommandEventListener commandEventListener) {
+        super(commandParams, commandEventListener);
     }
 
     @Override
     public void execute() {
-        commandEventListeners.forEach(CommandEventListener::showHelpCommands);
+        commandEventListener.showHelpCommands();
     }
 }

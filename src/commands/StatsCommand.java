@@ -5,12 +5,8 @@ import mvc.views.commandviews.CommandEventListener;
 import java.util.List;
 
 public class StatsCommand extends Command {
-    public StatsCommand(CommandParameters commandParams) {
-        super(commandParams);
-    }
-
-    public StatsCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
-        super(commandParams, commandViews);
+    public StatsCommand(CommandParameters commandParams, CommandEventListener commandEventListener) {
+        super(commandParams, commandEventListener);
     }
 
     @Override

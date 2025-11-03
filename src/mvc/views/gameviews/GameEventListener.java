@@ -5,7 +5,7 @@ import playercharacter.PlayerCharacter;
 
 import java.io.IOException;
 
-public interface GameObserver {
+public interface GameEventListener {
     void onQuit(PlayerCharacter character, CharacterView characterView);
 
     void onWon(PlayerCharacter character, CharacterView characterView, long startTime);

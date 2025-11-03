@@ -7,7 +7,7 @@ import entities.Enemies.Enemy;
 import entities.ItemContainers.ItemContainer;
 import gameexceptions.UnrecognizedCharException;
 import gamerandom.GameRNG;
-import game.*;
+import mvc.controllers.game.*;
 import gamerandom.RandomCommonEnemyGenerator;
 import gamerandom.RandomItemContainerGenerator;
 import mvc.views.enemyviews.EnemyObserver;
@@ -139,10 +139,10 @@ public class Place implements Serializable {
      * Fills the current place with a random number of distinct common enemies.
      */
     public void seedWithCommonEnemies(RandomCommonEnemyGenerator randomCommonEnemyGenerator) {
-        // For simplicity of the game interface's sake, each place may not contain more than one type
+        // For simplicity of the mvc.controllers.game interface's sake, each place may not contain more than one type
         // of enemy or item container.
         //
-        // Since this is a text game, the player typing "attack goblin" when there are 3 goblins will only
+        // Since this is a text mvc.controllers.game, the player typing "attack goblin" when there are 3 goblins will only
         // result in confusion, since the player will not know which of the 3 is currently attacked.
         //
         // A possible solution is attaching an id to each entity, however typing an id (even if it's a
@@ -166,10 +166,10 @@ public class Place implements Serializable {
      * Fills the current place with a random number of distinct item containers.
      */
     public void seedWithItemContainers(RandomItemContainerGenerator randomItemContainerGenerator) {
-        // For simplicity of the game interface's sake, each place may not contain more than one type
+        // For simplicity of the mvc.controllers.game interface's sake, each place may not contain more than one type
         // of enemy or item container.
         //
-        // Since this is a text game, the player typing "attack goblin" when there are 3 goblins will only
+        // Since this is a text mvc.controllers.game, the player typing "attack goblin" when there are 3 goblins will only
         // result in confusion, since the player will not know which of the 3 is currently attacked.
         //
         // A possible solution is attaching an id to each entity, however typing an id (even if it's a

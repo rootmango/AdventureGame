@@ -8,17 +8,17 @@ public class PromptView extends MainView implements PromptEventListener {
     }
 
     public void askStartNewGame() {
-        outputln("Do you want to start a new game?");
+        outputln("Do you want to start a new mvc.controllers.game?");
         showPromptChar();
     }
 
     public void askStartNewGameWithHint() {
-        outputln("Do you want to start a new game? (yes/no)");
+        outputln("Do you want to start a new mvc.controllers.game? (yes/no)");
         showPromptChar();
     }
 
     public void showNoExistingSavesMessage() {
-        outputln("No existing saves to load from. Creating a new game instead.");
+        outputln("No existing saves to load from. Creating a new mvc.controllers.game instead.");
     }
 
     public void showChooseSaveMessage() {

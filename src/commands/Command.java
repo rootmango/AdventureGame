@@ -1,7 +1,7 @@
 package commands;
 
-import game.GameTime;
-import game.MutableBoolean;
+import mvc.controllers.game.GameTimeUtils;
+import mvc.controllers.game.MutableBoolean;
 import gameio.GameSerialization;
 import maps.GameMap;
 import mvc.views.*;
@@ -10,7 +10,6 @@ import mvc.views.commandviews.CommandEventListener;
 import playercharacter.PlayerCharacter;
 import quests.Quest;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -24,14 +23,14 @@ public abstract class Command {
     protected final String saveName;
     protected final MutableBoolean quit;
     protected final GameSerialization gameSerialization;
-    protected final GameTime gameTime;
+    protected final GameTimeUtils gameTimeUtils;
     protected final Object lock;
-    protected final List<CommandEventListener> commandEventListeners = new ArrayList<>();
+    protected CommandEventListener commandEventListener;
     protected final String[] args;
 
     public abstract void execute();
 
-    public Command(CommandParameters commandParams) {
+    public Command(CommandParameters commandParams, CommandEventListener commandEventListener) {
         this.questView = commandParams.questView();
         this.characterView = commandParams.characterView();
         this.character = commandParams.character();
@@ -41,18 +40,10 @@ public abstract class Command {
         this.saveName = commandParams.saveName();
         this.quit = commandParams.quit();
         this.gameSerialization = commandParams.gameSerialization();
-        this.gameTime = commandParams.gameTime();
+        this.gameTimeUtils = commandParams.gameTimeUtils();
         this.lock = commandParams.lock();
         this.args = commandParams.args();
-    }
-
-    public Command(CommandParameters commandParams, List<CommandEventListener> commandEventListeners) {
-        this(commandParams);
-        this.commandEventListeners.addAll(commandEventListeners);
-    }
-
-    public void addCommandEventListeners(List<CommandEventListener> commandViews) {
-        this.commandEventListeners.addAll(commandViews);
+        this.commandEventListener = commandEventListener;
     }
 
     protected final String getSubjectNameFromCommandArgs(String[] commandArgs) {

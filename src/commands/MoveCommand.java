@@ -47,13 +47,8 @@ public class MoveCommand extends Command {
         return MOVE_DOWN_VALUES.contains(s.toLowerCase());
     }
 
-    public MoveCommand(CommandParameters commandParams) {
-        super(commandParams);
-        validateArgs();
-    }
-
-    public MoveCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
-        super(commandParams, commandViews);
+    public MoveCommand(CommandParameters commandParams, CommandEventListener commandEventListener) {
+        super(commandParams, commandEventListener);
         validateArgs();
     }
 
@@ -72,16 +67,16 @@ public class MoveCommand extends Command {
         synchronized (lock) {
             try {
                 if (checkUp(args[0])) {
-                    commandEventListeners.forEach(CommandEventListener::showMoveNorthMessage);
+                    commandEventListener.showMoveNorthMessage();
                     character.move(map, Direction.UP);
                 } else if (checkLeft(args[0])) {
-                    commandEventListeners.forEach(CommandEventListener::showMoveWestMessage);
+                    commandEventListener.showMoveWestMessage();
                     character.move(map, Direction.LEFT);
                 } else if (checkRight(args[0])) {
-                    commandEventListeners.forEach(CommandEventListener::showMoveEastMessage);
+                    commandEventListener.showMoveEastMessage();
                     character.move(map, Direction.RIGHT);
                 } else if (checkDown(args[0])) {
-                    commandEventListeners.forEach(CommandEventListener::showMoveSouthMessage);
+                    commandEventListener.showMoveSouthMessage();
                     character.move(map, Direction.DOWN);
                 }
             } catch (InaccessiblePlaceException e) {

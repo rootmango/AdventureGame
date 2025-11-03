@@ -2,7 +2,6 @@ package commands;
 
 import entities.Enemies.Enemy;
 import gameexceptions.InsufficientCommandArgsException;
-import gameexceptions.InvalidCommandArgsException;
 import maps.Place;
 import mvc.views.commandviews.CommandEventListener;
 
@@ -10,13 +9,8 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 public class AttackCommand extends Command {
-    public AttackCommand(CommandParameters commandParams) {
-        super(commandParams);
-        validateArgs();
-    }
-
-    public AttackCommand(CommandParameters commandParams, List<CommandEventListener> commandViews) {
-        super(commandParams, commandViews);
+    public AttackCommand(CommandParameters commandParams, CommandEventListener commandEventListener) {
+        super(commandParams, commandEventListener);
         validateArgs();
     }
 
@@ -44,7 +38,7 @@ public class AttackCommand extends Command {
                     enemy.attackCharacter(character);
                 }
             } catch (NoSuchElementException e) {
-                commandEventListeners.forEach(CommandEventListener::showNoSuchEnemyMessage);
+                commandEventListener.showNoSuchEnemyMessage();
             }
         }
     }

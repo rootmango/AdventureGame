@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class MapIO {
-    public List<String> randomMap() throws IOException {
+    public List<String> randomMapFileLines() throws IOException {
         try (Stream<Path> mapFilesStream = Files.list(Path.of(GamePaths.MAPS_DIRECTORY).toAbsolutePath())) {
             List<Path> mapFiles = mapFilesStream
                     .filter(path -> path.toString().endsWith(".gamemap"))

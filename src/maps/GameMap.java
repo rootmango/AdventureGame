@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static maps.Place.PLACES;
 
 /**
- * A wrapper class for a 2d array that represents the 2d game map.
+ * A wrapper class for a 2d array that represents the 2d mvc.controllers.game map.
  */
 public class GameMap implements Serializable {
     private final Place[][] placesArray;
@@ -25,7 +25,8 @@ public class GameMap implements Serializable {
     public GameMap(List<EnemyObserver> enemyObservers,
                    RandomCommonEnemyGenerator randomCommonEnemyGenerator,
                    RandomItemContainerGenerator randomItemContainerGenerator) throws IOException {
-        placesArray = fillMap(enemyObservers, randomCommonEnemyGenerator, randomItemContainerGenerator);
+        placesArray = initializeNewRandomMap();
+        fillMap(enemyObservers, randomCommonEnemyGenerator, randomItemContainerGenerator);
     }
 
     /**
@@ -59,26 +60,34 @@ public class GameMap implements Serializable {
         return fortress;
     }
 
-    public Place[][] fillMap(List<EnemyObserver> enemyObservers,
-                             RandomCommonEnemyGenerator randomCommonEnemyGenerator,
-                             RandomItemContainerGenerator randomItemContainerGenerator) throws IOException {
+    public Place[][] initializeNewRandomMap() throws IOException {
         MapIO mapIO = new MapIO();
-        List<String> lines = mapIO.randomMap();
+        List<String> lines = mapIO.randomMapFileLines();
         Place[][] array = new Place[lines.size()][lines.getFirst().length()];
         for (int i = 0; i < lines.size(); i++) {
             for (int j = 0; j < lines.get(i).length(); j++) {
                 char c = lines.get(i).charAt(j);
                 array[i][j] = new Place(j, i, c);
-                if (PLACES.containsKey(c)) {
-                    array[i][j].seedWithCommonEnemies(randomCommonEnemyGenerator);
-                    array[i][j].seedWithItemContainers(randomItemContainerGenerator);
-                } else if (c == 'F') {
-                    array[i][j].seedWithGoblinKing(enemyObservers);
-                }
             }
         }
 
         return array;
+    }
+
+    public void fillMap(List<EnemyObserver> enemyObservers,
+                             RandomCommonEnemyGenerator randomCommonEnemyGenerator,
+                             RandomItemContainerGenerator randomItemContainerGenerator) {
+        for (int i = 0; i < placesArray.length; i++) {
+            for (int j = 0; j < placesArray[0].length; j++) {
+                char placeChar = placesArray[i][j].getChar();
+                if (PLACES.containsKey(placeChar)) {
+                    placesArray[i][j].seedWithCommonEnemies(randomCommonEnemyGenerator);
+                    placesArray[i][j].seedWithItemContainers(randomItemContainerGenerator);
+                } else if (placeChar == 'F') {
+                    placesArray[i][j].seedWithGoblinKing(enemyObservers);
+                }
+            }
+        }
     }
 
     public void addEnemyObservers(List<EnemyObserver> observers) {

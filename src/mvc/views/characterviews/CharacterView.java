@@ -39,7 +39,7 @@ public class CharacterView extends MainView implements CharacterObserver {
 
     public void showOnChosenCharacterType(String characterTypeName) {
         if (PlayerCharacter.characterTypes.containsKey(characterTypeName.toLowerCase())) {
-            outputln(PlayerCharacter.characterTypes.get(characterTypeName).onChosen());
+            outputln(PlayerCharacter.characterTypes.get(characterTypeName.toLowerCase()).onChosen());
         }
     }
 

@@ -25,17 +25,4 @@ public class CollectXPForFortress extends Quest {
     protected void onceCompleted() {
         fortress.unlock();
     }
-
-//    @Override
-//    public String infoStatus() {
-//        int XP = Math.min(character.getXP(), necessaryXP);
-//        // so that the quest won't show more XP than what is needed
-//        // (if the character has 600 XP but the quest requires 500 XP,
-//        // the quest will show 500/500 XP instead of 600/500 XP)
-//
-//        return super.infoStatus() + " ("
-//                + String.format("%,d", XP) + "/"
-//                + String.format("%,d", necessaryXP)
-//                + " XP)";
-//    }
 }

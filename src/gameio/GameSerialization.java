@@ -1,6 +1,6 @@
 package gameio;
 
-import game.GameTime;
+import mvc.controllers.game.GameTimeUtils;
 import items.Consumables.Consumable;
 import items.Deserializers.ConsumableDeserializer;
 import entities.Deserializers.EnemyDeserializer;
@@ -91,7 +91,7 @@ public class GameSerialization {
     }
 
     public void createOrOverwriteSave(PlayerCharacter playerCharacter, GameMap gameMap,
-                                             long startTime, String saveName, GameTime gameTime)
+                                             long startTime, String saveName, GameTimeUtils gameTimeUtils)
             throws IOException {
 
         String saveDirName = GamePaths.SAVES_DIRECTORY + "/" + saveName;
@@ -109,7 +109,7 @@ public class GameSerialization {
         Files.writeString(gameMapFilePath, gson.toJson(gameMap));
 
         Path elapsedTimeFilePath = Path.of(saveDir + "/elapsed_time.json");
-        Files.writeString(elapsedTimeFilePath, gson.toJson(gameTime.elapsedTimeFrom(startTime)));
+        Files.writeString(elapsedTimeFilePath, gson.toJson(gameTimeUtils.elapsedTimeFrom(startTime)));
     }
 
     public List<String> avaiableSavesNames() throws IOException {

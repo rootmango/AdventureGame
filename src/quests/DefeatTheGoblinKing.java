@@ -1,6 +1,6 @@
 package quests;
 
-import game.MutableBoolean;
+import mvc.controllers.game.MutableBoolean;
 import maps.Place;
 
 public class DefeatTheGoblinKing extends Quest {
