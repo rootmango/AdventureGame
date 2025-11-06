@@ -1,7 +1,7 @@
 package gameexceptions;
 
 /**
- * Indicates that there's an unrecognized character in the mvc.controllers.game map.
+ * Indicates that there's an unrecognized character in the game map.
  */
 public class UnrecognizedCharException extends RuntimeException {
     public UnrecognizedCharException(String message) {

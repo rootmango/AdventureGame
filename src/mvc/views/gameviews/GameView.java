@@ -11,7 +11,7 @@ public class GameView extends MainView implements GameEventListener {
     protected final GameTimeUtils gameTimeUtils = new GameTimeUtils();
 
     public void onQuit(PlayerCharacter character, CharacterView characterView) {
-        outputln("Quitting mvc.controllers.game...");
+        outputln("Quitting game...");
         outputln("\nCharacter stats:");
         characterView.showCharacterStats(character);
         outputln();
@@ -19,7 +19,7 @@ public class GameView extends MainView implements GameEventListener {
 
     public void onWon(PlayerCharacter character, CharacterView characterView,
                       long startTime) {
-        outputln("You have won the mvc.controllers.game!");
+        outputln("You have won the game!");
         outputln("\nCharacter stats:");
         characterView.showCharacterStats(character);
         outputln();

@@ -88,7 +88,7 @@ public class PromptController {
     }
 
     /**
-     * Prompts for whether a new mvc.controllers.game should be started and returns the answer.
+     * Prompts for whether a new game should be started and returns the answer.
      */
     protected boolean promptNewGame() throws IOException {
         if (gameSaveView.savesDirIsEmpty()) {

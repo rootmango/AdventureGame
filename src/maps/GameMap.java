@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 import static maps.Place.PLACES;
 
 /**
- * A wrapper class for a 2d array that represents the 2d mvc.controllers.game map.
+ * A wrapper class for a 2d array that represents the 2d game map.
  */
 public class GameMap implements Serializable {
     private final Place[][] placesArray;

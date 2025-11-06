@@ -76,7 +76,7 @@ public class Game {
         ));
 
         questList.forEach(Quest::setOrUpdateCompleted);
-        // necessary if we are loading a mvc.controllers.game and the conditions are already met
+        // necessary if we are loading a game and the conditions are already met
 
         showIntroMessage();
     }
